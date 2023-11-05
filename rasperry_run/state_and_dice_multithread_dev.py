@@ -61,6 +61,7 @@ while True:
     # Attempt to get predictions and overlay them on the frame
     state_prediction = tu.get_state_prediction()
     
+    print(state_prediction)
     if state_prediction:
         if stateEmpty==False:
             if counterEmpty<4:
@@ -95,16 +96,16 @@ while True:
             if counterStill>=4:
                 tu.enqueue_frame_for_dice(frame_resized)
                 dice_prediction = tu.get_dice_prediction()
+                
                 if dice_prediction:
                     dice_sum, dice_pass = dice_prediction
-                
-                if dice_pass==False:
-                    #TODO overlay frame with "oops try again"
-                    reset_counters()
-                else:
-                    print("Dice: ",dice_sum)
-                    #TODO write to df
-                    stateStill=True  
+                    if dice_pass==False:
+                        #TODO overlay frame with "oops try again"
+                        reset_counters()
+                    else:
+                        print("Dice: ",dice_sum)
+                        #TODO write to df
+                        stateStill=True  
         else:
             pass       
         

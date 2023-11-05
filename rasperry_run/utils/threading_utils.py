@@ -4,10 +4,10 @@ from utils.eyes_predictor import get_sum_in_image
 from utils.state_predictor import predict_state
 
 # Queues for frame input and prediction output
-state_input_queue = queue.Queue()
-state_output_queue = queue.Queue()
-dice_input_queue = queue.Queue()
-dice_output_queue = queue.Queue()
+state_input_queue = queue.Queue(maxsize=2)
+state_output_queue = queue.Queue(maxsize=2)
+dice_input_queue = queue.Queue(maxsize=5)
+dice_output_queue = queue.Queue(maxsize=5)
 
 def state_worker():
     while True:

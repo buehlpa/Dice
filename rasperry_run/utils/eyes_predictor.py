@@ -126,7 +126,8 @@ def predict_dice(frame):
     # Run inference
     interpreter_dice.invoke()
     
-    # Get the output tensor
+    # Get the output tensorexit()
+    
     output_data_dice = interpreter_dice.get_tensor(output_details_dice[0]['index'])
     return output_data_dice
 
