@@ -1,7 +1,7 @@
 # main.py
 
 import cv2
-import threading_utils as tu
+import utils.threading_utils as tu
 
 # Initialize webcam
 cap = cv2.VideoCapture(0)
@@ -41,7 +41,7 @@ stateRolling = False
 stateStill = False
 stateRemoving = False
 
-
+dice_prediction=None
 
 # Main loop
 while True:
@@ -56,8 +56,8 @@ while True:
 
 
 
-
-    tu.enqueue_frame_for_dice(frame_resized)
+    tu.enqueue_frame_for_state(frame_resized)
+    
     # Attempt to get predictions and overlay them on the frame
     state_prediction = tu.get_state_prediction()
     
@@ -93,7 +93,7 @@ while True:
                 else:
                     pass   
             if counterStill>=4:
-                tu.enqueue_frame_for_state(frame_resized)
+                tu.enqueue_frame_for_dice(frame_resized)
                 dice_prediction = tu.get_dice_prediction()
                 if dice_prediction:
                     dice_sum, dice_pass = dice_prediction

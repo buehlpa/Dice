@@ -1,7 +1,7 @@
 import threading
 import queue
-from eyes_predictor import get_sum_in_image
-from state_predictor import predict_state
+from utils.eyes_predictor import get_sum_in_image
+from utils.state_predictor import predict_state
 
 # Queues for frame input and prediction output
 state_input_queue = queue.Queue()

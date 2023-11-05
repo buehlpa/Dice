@@ -34,7 +34,7 @@ while True:
 
 	# get the number of eyes in the image
     dice_predicted_sum , dice_prediction_pass = get_sum_in_image(frame_resized)  # TODO exception handling with prediciton state = False -> smthn wrong rethrow dices
-	
+    print(dice_prediction_pass)
 	# Display the resulting frame with the class label
     cv2.putText(frame, f'State: {class_label_state}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
     if dice_predicted_sum:

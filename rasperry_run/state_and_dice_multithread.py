@@ -1,7 +1,7 @@
 # main.py
 
 import cv2
-import threading_utils as tu
+import utils.threading_utils as tu
 
 # Initialize webcam
 cap = cv2.VideoCapture(0)
@@ -40,11 +40,10 @@ while True:
 
     tu.enqueue_frame_for_state(frame_resized)
     dice_prediction = tu.get_dice_prediction()
+    
     if dice_prediction:
         dice_sum, dice_pass = dice_prediction
-        if dice_pass:
-            cv2.putText(frame, f'Dice: {dice_sum}', (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-
+        cv2.putText(frame, f'Dice: {dice_sum}', (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
 
 
 

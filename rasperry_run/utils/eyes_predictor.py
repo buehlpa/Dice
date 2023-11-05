@@ -151,7 +151,9 @@ def get_sum_in_image(img):
     
     for i in range(len(cropped_images)):
         # Exception if cropped image is not nearly quadratic -> inidcating some dices are not detected
-        if  (cropped_images[i].shape[0] / cropped_images[i].shape[1]) > 1.3 or (cropped_images[i].shape[1] / cropped_images[i].shape[0]) < (1. / 1.3):
+        #print("(cropped_images[i].shape[0] / cropped_images[i].shape[1])",(cropped_images[i].shape[0] / cropped_images[i].shape[1]))
+        
+        if  (cropped_images[i].shape[0] / cropped_images[i].shape[1]) > 1.4 or (cropped_images[i].shape[1] / cropped_images[i].shape[0]) < (1. / 1.4):
             prediction_state = False
         else :
             pass 
