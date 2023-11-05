@@ -3,30 +3,30 @@ import csv
 import utils.threading_utils as tu
 import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
-from threading import Thread
-import time
-import os
 
+# Function to plot histogram
+def plot_histogram(csv_file_path):
+    # Read the data from CSV file without a header
+    data = pd.read_csv(csv_file_path, header=None)
+    
+    # If the file is empty, do not plot
+    if data.empty:
+        print("The CSV file is empty. No data to plot.")
+        return
+    
+    # Assuming the data you want is in the first column
+    dice_data = data[0]
+    
+    # Plot the histogram
+    plt.figure("Histogram")
+    plt.hist(dice_data, bins=range(1, int(dice_data.max()) + 2), edgecolor='black')
+    plt.title('Dice Roll Distribution')
+    plt.xlabel('Dice Sum')
+    plt.ylabel('Frequency')
+    
+    # Show the plot in a non-blocking way
+    plt.show(block=False)
 
-
-# New imports and functions
-def update_histogram():
-    plt.ion()  # Enable interactive mode
-    fig, ax = plt.subplots()
-    while True:  # This loop will keep checking for changes and update the histogram
-        if os.path.exists('/results/res.csv'):
-            df = pd.read_csv('/results/res.csv')
-            ax.clear()
-            df.hist(ax=ax)  # Replace with the column name if your CSV has headers
-            plt.draw()
-            plt.pause(0.01)  # Pause to ensure the plot updates
-        time.sleep(1)  # Check for updates every second or more
-
-
-# Start histogram thread
-histogram_thread = Thread(target=update_histogram)
-histogram_thread.start()
 
 # Initialize webcam
 cap = cv2.VideoCapture(0)
@@ -34,14 +34,17 @@ if not cap.isOpened():
     print("Cannot open camera")
     exit()
 
-# Start the worker threads
+# Start the worker threads for stateprediciton and dice prediction
 tu.start_workers()
 
 show_dice='Dice:  '
 show_state='State: '
 
+
+
 # Main loop
 while True:
+    
     # Capture frame-by-frame
     ret, frame = cap.read()
     if not ret:
@@ -73,18 +76,19 @@ while True:
     cv2.imshow('frame', frame)
 
 
-    # save result to file 
+    # save result to file  by pressing space and 
     if cv2.waitKey(1) & 0xFF == ord(' '):
-            with open('/results/res.csv', mode='a') as file:
+            with open('results/res.csv', mode='a') as file:
                 writer = csv.writer(file)
                 writer.writerow([dice_sum])
-
+            plot_histogram('results/res.csv')
+            
     # Break the loop if 'q' is pressed
     if cv2.waitKey(1) & 0xFF == ord('q'):
-        histogram_thread.join()
+        plt.close('all')
         break
 
-# Stop the worker threads and release resources
-tu.stop_workers()
+
+tu.stop_workers()  # Stop worker threads
 cap.release()
 cv2.destroyAllWindows()
