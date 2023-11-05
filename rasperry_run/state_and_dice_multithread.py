@@ -12,9 +12,7 @@ if not cap.isOpened():
 # Start the worker threads
 tu.start_workers()
 
-# Variables to control when to enqueue frames for each function
-process_state = True
-process_dice = False
+
 
 # Main loop
 while True:
@@ -27,24 +25,29 @@ while True:
     # Resize the frame to the required input size
     frame_resized = cv2.resize(frame, (224, 224))
 
-    # Conditionally enqueue the frame for state prediction
-    if process_state:
-        tu.enqueue_frame_for_state(frame_resized)
 
-    # Conditionally enqueue the frame for dice prediction
-    if process_dice:
-        tu.enqueue_frame_for_dice(frame_resized)
-
+    tu.enqueue_frame_for_dice(frame_resized)
     # Attempt to get predictions and overlay them on the frame
     state_prediction = tu.get_state_prediction()
+    
+    
+    
     if state_prediction:
         cv2.putText(frame, f'State: {state_prediction}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
 
+
+
+
+    tu.enqueue_frame_for_state(frame_resized)
     dice_prediction = tu.get_dice_prediction()
     if dice_prediction:
         dice_sum, dice_pass = dice_prediction
         if dice_pass:
             cv2.putText(frame, f'Dice: {dice_sum}', (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+
+
+
+
 
     # Update the condition variables as needed, based on your application logic
 

@@ -132,7 +132,6 @@ def predict_dice(frame):
 
 
 
-
 def get_sum_in_image(img):
     """
     Given an image of dice, this function returns the sum of the number of eyes
@@ -152,7 +151,7 @@ def get_sum_in_image(img):
     
     for i in range(len(cropped_images)):
         # Exception if cropped image is not nearly quadratic -> inidcating some dices are not detected
-        if  cropped_images[i].shape[0] / cropped_images[i].shape[1] > 1.2 or cropped_images[i].shape[0] / cropped_images[i].shape[1] < 1.2:
+        if  (cropped_images[i].shape[0] / cropped_images[i].shape[1]) > 1.3 or (cropped_images[i].shape[1] / cropped_images[i].shape[0]) < (1. / 1.3):
             prediction_state = False
         else :
             pass 
