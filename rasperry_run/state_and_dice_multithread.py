@@ -48,6 +48,11 @@ while True:
     cv2.imshow('frame', frame)
 
     # Break the loop if 'q' is pressed
+    if cv2.waitKey(1) & 0xFF == ord(' '):
+        print("hey")
+
+
+    # Break the loop if 'q' is pressed
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
