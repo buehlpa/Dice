@@ -74,7 +74,7 @@ while True:
 
     # Show the frame
     cv2.imshow('frame', frame)
-
+    #TODO check if possible to stream frames to dashboard
 
     # save result to file  by pressing space and 
     if cv2.waitKey(1) & 0xFF == ord(' '):

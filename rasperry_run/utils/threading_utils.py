@@ -6,6 +6,7 @@ from utils.state_predictor import predict_state
 # Queues for frame input and prediction output
 state_input_queue = queue.Queue(maxsize=2)
 state_output_queue = queue.Queue(maxsize=2)
+
 dice_input_queue = queue.Queue(maxsize=5)
 dice_output_queue = queue.Queue(maxsize=5)
 
