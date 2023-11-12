@@ -1,3 +1,9 @@
+import cv2
+import csv
+import utils.threading_utils as tu
+import pandas as pd
+import matplotlib.pyplot as plt
+
 import sys
 import cv2
 import numpy as np
@@ -8,19 +14,25 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 
-
-
 class VideoStreamWidget(QWidget):
     def __init__(self):
         super().__init__()
+        
         self.video_capture = cv2.VideoCapture(0)
+        if not self.video_capture.isOpened():
+            print("Cannot open camera")
         
-        
-        
+        # Start the worker threads for stateprediciton and dice prediction
+        tu.start_workers()
+
         self.init_ui()
         self.update_frame()
+        
+        
         self.name = ""
         self.score = 0
+        self.show_dice='Dice:  '
+        self.show_state='State: '
 
     def init_ui(self):
         
@@ -53,14 +65,42 @@ class VideoStreamWidget(QWidget):
         self.reset_histogram()  # Initialize the histogram
 
     def update_frame(self):
+        
         ret, frame = self.video_capture.read()
         if ret:
-            rgb_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            h, w, ch = rgb_image.shape
+            
+            #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            show_state='State: '
+            show_dice='Dice:  '
+            ################## predictors
+            frame_resized = cv2.resize(frame, (224, 224))
+            # State prediciton
+            tu.enqueue_frame_for_state(frame_resized)
+            state_prediction = tu.get_state_prediction()
+            if state_prediction:
+                show_state=f'State: {state_prediction}'
+                
+            # dice eyes prediciton
+            tu.enqueue_frame_for_dice(frame_resized)
+            dice_prediction = tu.get_dice_prediction()
+            if dice_prediction:
+                dice_sum, dice_pass = dice_prediction
+                show_dice = f'Dice: {dice_sum}'
+
+            # Update text
+            cv2.putText(frame, show_state, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)       
+            cv2.putText(frame,show_dice, (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+            ################### 
+            
+            
+            
+            h, w, ch = frame.shape
             bytes_per_line = ch * w
-            convert_to_Qt_format = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
+            convert_to_Qt_format = QImage(frame.data, w, h, bytes_per_line, QImage.Format_RGB888)
             p = convert_to_Qt_format.scaled(640, 480, aspectRatioMode=Qt.KeepAspectRatio)
             self.image_label.setPixmap(QPixmap.fromImage(p))
+        else:
+            print("Error reading frame")
 
     def reset_histogram(self):
         
@@ -97,3 +137,7 @@ if __name__ == '__main__':
     main_window = VideoStreamWidget()
     main_window.show()
     sys.exit(app.exec_())
+
+
+
+

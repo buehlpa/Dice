@@ -1,21 +1,29 @@
 import numpy as np
 import cv2
+
 import tflite_runtime.interpreter as tflite
+import os
 
 
-MODEL_PATH="models/model_single_dices.tflite"
+model_dir = 'models'
+model_file = 'model_single_dices.tflite'
 
+MODEL_PATH = os.path.join(model_dir, model_file)
 
 class_labels_dice = ["1", "2", "3", "4", "5", "6"]
+
 
 ##Load the TFLite model and allocate tensors.
 # dice interpreter model detects the number of eyes on the dice
 interpreter_dice = tflite.Interpreter(model_path=MODEL_PATH)
+
 interpreter_dice.allocate_tensors()
+
 
 input_details_dice = interpreter_dice.get_input_details()
 output_details_dice = interpreter_dice.get_output_details()
 input_shape_dice = input_details_dice[0]['shape']
+
 
 
 
@@ -167,3 +175,5 @@ def get_sum_in_image(img):
         dice_label = class_labels_dice[prediction_dice]
         sum_in_image+=int(dice_label)
     return sum_in_image , prediction_state
+
+

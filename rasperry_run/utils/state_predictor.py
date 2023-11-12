@@ -2,8 +2,12 @@
 import numpy as np
 import cv2
 import tflite_runtime.interpreter as tflite
+import os
 
-MODEL_PATH = "models/model_dices_eyes2.tflite"
+
+model_dir = 'models'
+model_file = 'model_dices_eyes2.tflite'
+MODEL_PATH = os.path.join(model_dir, model_file)
 
 class_labels_state = ["empty", "rolling", "still"]
 
