@@ -3,6 +3,7 @@
  Dice detector BOX from Zurich University of Applied Sciences (ZHAW).
  In development!
 
+![image](https://github.com/buehlpa/Dice/assets/64488738/b20d99c2-2590-46f0-9bd2-69ab2900fd22)
 
 
 ## Installation on UNIX
