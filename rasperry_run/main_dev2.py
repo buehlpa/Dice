@@ -1,143 +1,140 @@
-import cv2
-import csv
-import utils.threading_utils as tu
-import pandas as pd
-import matplotlib.pyplot as plt
-
 import sys
 import cv2
-import numpy as np
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QPushButton, QLineEdit
+from PyQt5.QtCore import QThread, Qt, pyqtSignal
 from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtCore import QTimer, Qt
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
+from PyQt5.QtWidgets import QWidget, QLabel, QApplication
+import queue
+from PyQt5.QtCore import QThread, Qt, pyqtSignal, pyqtSlot
+import time
+
+# Define the functions a() and b()
+def a(rgbImage):
+    # ... processing logic for function a ...
+    # Convert the image to grayscale as a dummy processing step
+    rgbImage = cv2.cvtColor(rgbImage, cv2.COLOR_RGB2GRAY)
+    return rgbImage
+
+def b(rgbImage):
+    # ... processing logic for function b ...
+    # Dummy processing step
+    time.sleep(0.5)
+    return "a"
 
 
-class VideoStreamWidget(QWidget):
+# Thread class for function a
+class ThreadA(QThread):
+    def __init__(self, input_queue, output_queue):
+        QThread.__init__(self)
+        self.input_queue = input_queue
+        self.output_queue = output_queue
+
+    def run(self):
+        while True:
+            rgbImage = self.input_queue.get()
+            if rgbImage is None:  # None is a signal to stop
+                return
+            result = a(rgbImage)  # Process the image
+            self.output_queue.put(result)
+
+# Thread class for function b
+class ThreadB(QThread):
+    def __init__(self, input_queue, output_queue):
+        QThread.__init__(self)
+        self.input_queue = input_queue
+        self.output_queue = output_queue
+
+    def run(self):
+        while True:
+            rgbImage = self.input_queue.get()
+            if rgbImage is None:  # None is a signal to stop
+                return
+            result = b(rgbImage)  # Process the image
+            self.output_queue.put(result)
+
+# PyQt thread class for video capture
+class CaptureThread(QThread):
+    changePixmap = pyqtSignal(QImage)
+
+    def __init__(self, input_queue_a, input_queue_b):
+        QThread.__init__(self)
+        self.input_queue_a = input_queue_a
+        self.input_queue_b = input_queue_b
+        self.thread_b_output_queue = 
+
+    def run(self):
+        cap = cv2.VideoCapture(0)
+        if not cap.isOpened():
+            print("Unable to access the camera")
+        else:
+            print("Starting video capture...")
+
+        while True:
+            ret, frame = cap.read()
+            if ret:
+                rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                if not self.input_queue_a.full():
+                    self.input_queue_a.put(rgbImage.copy())  # Put a copy of the image in the input queue A
+                if not self.input_queue_b.full():
+                    self.input_queue_b.put(rgbImage.copy())  # Put a copy of the image in the input queue B
+
+                #print(self.input_queue_b.get())
+                print(self.thread_b_output_queue.get())
+                
+                
+                h, w, ch = rgbImage.shape
+                bytesPerLine = ch * w
+                convertToQtFormat = QImage(rgbImage.data, w, h, bytesPerLine, QImage.Format_RGB888)
+                p = convertToQtFormat.scaled(640, 480, Qt.KeepAspectRatio)
+                self.changePixmap.emit(p)
+            else:
+                print("Failed to capture video frame")
+                break
+
+        cap.release()
+
+class App(QWidget):
     def __init__(self):
         super().__init__()
+        self.input_queue_a = queue.Queue(maxsize=5)
+        self.input_queue_b = queue.Queue(maxsize=5)
+        self.thread_a_output_queue = queue.Queue()
+        self.thread_b_output_queue = queue.Queue()
         
-        self.video_capture = cv2.VideoCapture(0)
-        if not self.video_capture.isOpened():
-            print("Cannot open camera")
-        
-        # Start the worker threads for stateprediciton and dice prediction
-        tu.start_workers()
+        self.threadA = ThreadA(self.input_queue_a, self.thread_a_output_queue)
+        self.threadB = ThreadB(self.input_queue_b, self.thread_b_output_queue)
+        self.captureThread = CaptureThread(self.input_queue_a, self.input_queue_b)
 
-        self.init_ui()
-        self.update_frame()
-        
-        
-        self.name = ""
-        self.score = 0
-        self.show_dice='Dice:  '
-        self.show_state='State: '
+        self.threadA.start()
+        self.threadB.start()
+        self.captureThread.changePixmap.connect(self.setImage)
+        self.captureThread.start()
 
-    def init_ui(self):
-        
-        
-        self.image_label = QLabel(self)
-        self.histogram_label = QLabel(self)
-        
-        
-        self.reset_button = QPushButton('Reset Histogram', self)
-        self.reset_button.clicked.connect(self.reset_histogram)
+        self.initUI()
 
-        self.name_entry = QLineEdit(self)
-        self.name_entry.setPlaceholderText("Enter name here")
-        self.name_entry.returnPressed.connect(self.update_name_score)
+    def initUI(self):
+        self.setWindowTitle('PyQt5 Video')
+        self.setGeometry(100, 100, 800, 600)
+        self.label = QLabel(self)
+        self.label.resize(640, 480)
+        self.captureThread.changePixmap.connect(self.setImage)
+        self.show()
 
-        self.score_label = QLabel("Name: \nScore: ", self)
-        
-        layout = QVBoxLayout()
-        layout.addWidget(self.image_label)
-        layout.addWidget(self.histogram_label)
-        layout.addWidget(self.reset_button, alignment=Qt.AlignCenter)
-        layout.addWidget(self.name_entry)
-        layout.addWidget(self.score_label)
-        self.setLayout(layout)
-
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update_frame)
-        self.timer.start(30)  # refresh every 30 ms
-
-        self.reset_histogram()  # Initialize the histogram
-
-    def update_frame(self):
-        
-        ret, frame = self.video_capture.read()
-        if ret:
-            
-            #frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            show_state='State: '
-            show_dice='Dice:  '
-            ################## predictors
-            frame_resized = cv2.resize(frame, (224, 224))
-            # State prediciton
-            tu.enqueue_frame_for_state(frame_resized)
-            state_prediction = tu.get_state_prediction()
-            if state_prediction:
-                show_state=f'State: {state_prediction}'
-                
-            # dice eyes prediciton
-            tu.enqueue_frame_for_dice(frame_resized)
-            dice_prediction = tu.get_dice_prediction()
-            if dice_prediction:
-                dice_sum, dice_pass = dice_prediction
-                show_dice = f'Dice: {dice_sum}'
-
-            # Update text
-            cv2.putText(frame, show_state, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)       
-            cv2.putText(frame,show_dice, (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-            ################### 
-            
-            
-            
-            h, w, ch = frame.shape
-            bytes_per_line = ch * w
-            convert_to_Qt_format = QImage(frame.data, w, h, bytes_per_line, QImage.Format_RGB888)
-            p = convert_to_Qt_format.scaled(640, 480, aspectRatioMode=Qt.KeepAspectRatio)
-            self.image_label.setPixmap(QPixmap.fromImage(p))
-        else:
-            print("Error reading frame")
-
-    def reset_histogram(self):
-        
-        # just some random code to show that wen can use matplotlib 
-        # Generate a new histogram plot
-        fig = Figure()
-        canvas = FigureCanvas(fig)
-        ax = fig.add_subplot(111)
-        random_numbers = np.random.randn(1000)
-        ax.hist(random_numbers, bins=30)
-        ax.set_xlabel('Value')
-        ax.set_ylabel('Frequency')
-        ax.set_title('Histogram of Random Numbers')
-
-        # Render the plot to a canvas and then convert to a QPixmap
-        canvas.draw()
-        width, height = fig.get_size_inches() * fig.get_dpi()
-        image = np.fromstring(canvas.tostring_rgb(), dtype='uint8').reshape(int(height), int(width), 3)
-        qt_image = QImage(image.data, image.shape[1], image.shape[0], QImage.Format_RGB888)
-        pixmap = QPixmap.fromImage(qt_image)
-        self.histogram_label.setPixmap(pixmap.scaled(self.histogram_label.size(), Qt.KeepAspectRatio))
-
-    def update_name_score(self):
-        self.name = self.name_entry.text()
-        self.score = np.random.randint(0, 101)  # Random score between 0 and 100
-        self.score_label.setText(f"Name: {self.name}\nScore: {self.score}")
+    @pyqtSlot(QImage)
+    def setImage(self, image):
+        self.label.setPixmap(QPixmap.fromImage(image))
 
     def closeEvent(self, event):
-        self.video_capture.release()
-
+        self.input_queue_a.put(None)  # Signal to threads A to stop
+        self.input_queue_b.put(None)  # Signal to threads B to stop
+        self.captureThread.terminate()
+        self.captureThread.wait()
+        self.threadA.terminate()
+        self.threadA.wait()
+        self.threadB.terminate()
+        self.threadB.wait()
+        super().closeEvent(event)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    main_window = VideoStreamWidget()
-    main_window.show()
+    ex = App()
     sys.exit(app.exec_())
-
-
-
-
