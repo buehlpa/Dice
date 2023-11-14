@@ -190,7 +190,7 @@ class DiceRecognizer:
         """
         class_labels_dice = ["1", "2", "3", "4", "5", "6"]
         img,_, cropped_images = self.process_image(img)
-
+        print("yehee")
         sum_in_image=0
         prediction_state = True
         
