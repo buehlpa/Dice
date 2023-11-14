@@ -14,6 +14,11 @@
 ```
 conda create -n dice python=3.9.18
 ```
+or
+```
+python -m venv /path/to/new/virtual/environment
+```
+
 ```
 pip install -r requirements_unix.txt
 ```
@@ -25,8 +30,7 @@ Dice/raspberry_run/models/
 ```
 
 
-## Installation on UNIX
-
+## Hints
 Dice/raspberry_run  - this directory contains the code to run on the rasperry PI with limited resources, the core is developed in /workspace 
 
 ```
@@ -51,7 +55,7 @@ Dice/workspace  - train DL models  on machine with gpu
                 
                 
                 
-# fixing not installed tflite:
+# Fixing tflite:
 
 tflite runtime with
 
