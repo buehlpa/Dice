@@ -47,3 +47,14 @@ Dice/workspace  - train DL models  on machine with gpu
 
             - develop Algos to detect dices 
                 - greenscreen , eroding, masking etc. 
+                
+                
+                
+                
+# fixing not installed tflite:
+
+tflite runtime with
+
+pip install tensorflow
+
+..
