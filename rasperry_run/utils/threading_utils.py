@@ -2,25 +2,24 @@ import threading
 import queue
 import numpy as np
 import time
-## V1  
-#from utils.eyes_predictor import get_sum_in_image
-#from utils.state_predictor import predict_state
+# V1  
+from utils.eyes_predictor import get_sum_in_image
+from utils.state_predictor import predict_state
 
-## V2
-from utils.predictors import DiceStatePredictor, DiceRecognizer
-dice_Pred=DiceRecognizer()
-state_Pred=DiceStatePredictor()
-
-
+# ## V2 not tested # TODO test it on the pi or on UNIX machine
+# from utils.predictors import DiceStatePredictor, DiceRecognizer
+# dice_Pred=DiceRecognizer()
+# state_Pred=DiceStatePredictor()
 
 
-### dummy utils for testing if tensorflowlite does not work  , for testing only els eimpoort from utils
-def predict_state(frame):
-    time.sleep(0.5)
-    return np.choose(1, ["empty", "still", "rolling"])
-def get_sum_in_image(frame):
-    time.sleep(0.5)
-    return np.choose(1, [1,2,3,4,5,6]) , True 
+
+# ### dummy utils for testing if tensorflowlite does not work  , for testing only els eimpoort from utils
+# def predict_state(frame):
+#     time.sleep(0.5)
+#     return np.choose(1, ["empty", "still", "rolling"])
+# def get_sum_in_image(frame):
+#     time.sleep(0.5)
+#     return np.choose(1, [1,2,3,4,5,6]) , True 
 
 
 
@@ -44,10 +43,10 @@ def state_worker():
         if frame is None:  # Exit signal
             break
         try:
-            ## V1  
-            # class_label_state = predict_state(frame)
-            ## V2
-            class_label_state = state_Pred.predict_state(frame)  
+            # V1  
+            class_label_state = predict_state(frame)
+            # ## V2 not tested yet
+            # class_label_state = state_Pred.predict_state(frame)  
             
             state_output_queue.put(class_label_state)
         except Exception as e:
@@ -59,10 +58,11 @@ def dice_worker():
         if frame is None:  # Exit signal
             break
         try:
-            ## V1  
-            # dice_predicted_sum, dice_prediction_pass = get_sum_in_image(frame)
-            ## V2
-            dice_predicted_sum, dice_prediction_pass = dice_Pred.get_sum_in_image(frame)
+            # V1  
+            dice_predicted_sum, dice_prediction_pass = get_sum_in_image(frame)
+            
+            # ## V2
+            # dice_predicted_sum, dice_prediction_pass = dice_Pred.get_sum_in_image(frame)
             
             dice_output_queue.put((dice_predicted_sum, dice_prediction_pass))
         except Exception as e:
