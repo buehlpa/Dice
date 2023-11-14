@@ -8,7 +8,7 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot, QThread
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtGui import QPainter, QColor, QFont
 
-
+# imports from utils # TODO test the functions on raspberry pi
 from utils.eyes_predictor import get_sum_in_image
 from utils.state_predictor import predict_state
 
