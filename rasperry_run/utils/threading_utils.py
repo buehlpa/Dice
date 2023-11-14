@@ -3,8 +3,8 @@ import queue
 import numpy as np
 import time
 # V1  
-from utils.eyes_predictor import get_sum_in_image
-from utils.state_predictor import predict_state
+# from utils.eyes_predictor import get_sum_in_image
+# from utils.state_predictor import predict_state
 
 # ## V2 not tested # TODO test it on the pi or on UNIX machine
 # from utils.predictors import DiceStatePredictor, DiceRecognizer
@@ -13,21 +13,15 @@ from utils.state_predictor import predict_state
 
 
 
-# ### dummy utils for testing if tensorflowlite does not work  , for testing only els eimpoort from utils
-# def predict_state(frame):
-#     time.sleep(0.5)
-#     return np.choose(1, ["empty", "still", "rolling"])
-# def get_sum_in_image(frame):
-#     time.sleep(0.5)
-#     return np.choose(1, [1,2,3,4,5,6]) , True 
+### dummy utils for testing if tensorflowlite does not work  , for testing only els eimpoort from utils
 
+def predict_state(frame):
+    state=np.choose(1, ["empty", "still", "rolling"])
+    return state
 
-
-
-
-
-
-
+def get_sum_in_image(frame):
+    new=np.choose(1, [1,2,3,4,5,6])
+    return new , True 
 
 
 # Queues for frame input and prediction output
