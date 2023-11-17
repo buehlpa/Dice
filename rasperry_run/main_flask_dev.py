@@ -93,7 +93,7 @@ def plot_histogram():
 
 
 
-
+#http://127.0.0.1:5000/plot.png
 
 app = Flask(__name__)
 
@@ -124,9 +124,7 @@ def index():
                     <img src="/video_feed">
                     <img id="histogram" src="/plot.png">
                     <script>
-                    setInterval(function(){
-                        document.getElementById('histogram').src = '/plot.png?rand=' + Math.random();
-                    }, 2000);
+                    setInterval(function(){document.getElementById('histogram').src = '/plot.png';}, 2000);
                         
                         window.onbeforeunload = function(){
                             navigator.sendBeacon('/close_app');
