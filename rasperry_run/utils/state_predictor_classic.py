@@ -29,7 +29,6 @@ class StateDetector:
         
         self.last_frame = framescaled
         
-        print("score",score,"difference",difference)
         state = "undecided"
         # deciding wether a frame is empty or moving
         if score < self.threshold:
