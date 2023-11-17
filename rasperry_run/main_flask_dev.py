@@ -1,5 +1,6 @@
 import cv2
 import utils.threading_utils as tu
+from utils.state_predictor_classic import StateDetector
 from flask import Flask, Response, request
 
 
@@ -13,7 +14,11 @@ def gen_frames():
     if not cap.isOpened():
         print("Cannot open camera")
         exit()
-
+    
+    # TODO add calibration functionality 
+    state_detector = StateDetector(threshold=0.1, moving_treshold =10, max_frames_stack=4,imshape=(480, 640))
+    
+    
     tu.start_workers()
 
     show_dice = 'Dice:  '
@@ -24,22 +29,28 @@ def gen_frames():
         if not ret:
             print("Can't receive frame (stream end?). Exiting ...")
             break
-
-        frame_resized = cv2.resize(frame, (224, 224))
-        tu.enqueue_frame_for_state(frame_resized)
-        state_prediction = tu.get_state_prediction()
-        if state_prediction:
-            show_state = f'State: {state_prediction}'
-
-        tu.enqueue_frame_for_dice(frame_resized)
+        
+        # run fast state detection 
+        grayscaleframe= cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        state , capture=state_detector.get_scene_state(grayscaleframe)
+        show_state = f'State: {state}'
+        
+        # if state detector returned capture = True, enqueue the frame for dice detection 
+        if capture:
+            frame_resized = cv2.resize(frame, (224, 224))
+            tu.enqueue_frame_for_dice(frame_resized)
+            
+        # if dice prediction is available, show it    
         dice_prediction = tu.get_dice_prediction()
         if dice_prediction:
             dice_sum, dice_pass = dice_prediction
             show_dice = f'Dice: {dice_sum}'
+            
         cv2.putText(frame, show_state, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
         cv2.putText(frame, show_dice, (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
 
-        ret, buffer = cv2.imencode('.jpg', frame)
+        # send image to flask app
+        _, buffer = cv2.imencode('.jpg', frame)
         frame = buffer.tobytes()
         yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
