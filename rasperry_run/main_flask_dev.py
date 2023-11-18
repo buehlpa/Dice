@@ -1,5 +1,9 @@
+# either multiprocessing or threading
+#import utils.threading_utils as tu
+import utils.multiprocessing_utils as tu
 
-import utils.threading_utils as tu
+import time
+
 from utils.state_predictor import StateDetector
 from io import BytesIO
 import cv2
@@ -45,14 +49,20 @@ def gen_frames():
     # TODO add calibration functionality 
     state_detector = StateDetector(threshold=0.1, moving_treshold =10, max_frames_stack=4,imshape=(480, 640))
     
-    
+    # start the workes , either multiprocessing or threading
     tu.start_workers()
+    
+    #for fps calculation
 
+    frame_count = 0
+    start_time = time.time()
+    fps = 1
+    # initiate states
     show_dice = 'Dice:  '
     show_state = 'State: '
     
     
-#   # skip factor for only proicessing some frames
+#   # skip factor for only processing some frames
     frame_counter= 0
     skip_factor=1
     
@@ -65,6 +75,9 @@ def gen_frames():
             tu.stop_workers()
             cv2.destroyAllWindows()
             break
+        
+        
+        
         
 #       # to skip frames set skip factor to > 1
         frame_counter=(frame_counter+1)%skip_factor
@@ -90,10 +103,23 @@ def gen_frames():
             
         
         
-        # ov    
+        # overlay state and dice
         cv2.putText(frame, show_state, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
         cv2.putText(frame, show_dice, (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
         
+        
+        # Calculate and display FPS
+        frame_count += 1
+        # Calculate elapsed time
+        elapsed_time = time.time() - start_time
+        if elapsed_time >= 1.0:  # Update FPS every second
+            fps = int(frame_count / elapsed_time)
+            frame_count = 0
+            start_time = time.time()
+            
+        # Display FPS on the frame
+        cv2.putText(frame, f'FPS: {fps:.2f}', (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+
         # send image to flask app
         _, buffer = cv2.imencode('.jpg', frame)
         displayframe = buffer.tobytes()

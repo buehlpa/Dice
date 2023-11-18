@@ -11,18 +11,14 @@ def get_sum_in_image(frame):
 dice_input_queue = queue.Queue(maxsize=5)
 dice_output_queue = queue.Queue(maxsize=5)
 
+
 def dice_worker():
     while True:
         frame = dice_input_queue.get()
         if frame is None:  # Exit signal
             break
         try:
-            # V1  
             dice_predicted_sum, dice_prediction_pass = get_sum_in_image(frame)
-            
-            # ## V2
-            # dice_predicted_sum, dice_prediction_pass = dice_Pred.get_sum_in_image(frame)
-            
             dice_output_queue.put((dice_predicted_sum, dice_prediction_pass))
         except Exception as e:
             dice_output_queue.put(e)
