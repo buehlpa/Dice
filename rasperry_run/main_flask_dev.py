@@ -1,6 +1,6 @@
 # either multiprocessing or threading
-#import utils.threading_utils as tu
-import utils.multiprocessing_utils as tu
+import utils.threading_utils as tu
+# import utils.multiprocessing_utils as tu # works but only 1 fps faster than threading ..
 
 import time
 

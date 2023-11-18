@@ -2,11 +2,13 @@ import threading
 import queue
 import numpy as np
 import random
+from utils.eyes_predictor import *
 
-def get_sum_in_image(frame):
-    new=random.choice([1,2,3,4,5,6]) 
-    print(new)
-    return new , True 
+
+# def get_sum_in_image(frame):
+#     new=random.choice([1,2,3,4,5,6]) 
+#     print(new)
+#     return new , True 
 
 dice_input_queue = queue.Queue(maxsize=5)
 dice_output_queue = queue.Queue(maxsize=5)
