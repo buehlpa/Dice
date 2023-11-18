@@ -11,13 +11,13 @@ from flask import Flask, Response, request, render_template_string,send_file
 import webbrowser
 import pandas as pd
 import matplotlib.pyplot as plt
-import io
-import base64
 import threading
 import os
 import logging
 log = logging.getLogger('werkzeug')
 log.disabled = True
+
+# lock matqplotlib for multithreading
 import matplotlib
 matplotlib.use('Agg') 
 from threading import Lock
@@ -76,9 +76,6 @@ def gen_frames():
             cv2.destroyAllWindows()
             break
         
-        
-        
-        
 #       # to skip frames set skip factor to > 1
         frame_counter=(frame_counter+1)%skip_factor
         if frame_counter!=0:
@@ -101,7 +98,6 @@ def gen_frames():
             show_dice = f'Dice: {dice_sum}'
             append_to_csv(RESPATH, dice_sum)
             
-        
         
         # overlay state and dice
         cv2.putText(frame, show_state, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
@@ -143,10 +139,6 @@ def plot_histogram(data_path, column_name):
 
 
 
-
-
-#http://127.0.0.1:5000/plot.png
-
 app = Flask(__name__)
 
 @app.route('/reset_histogram', methods=['POST'])
@@ -183,128 +175,128 @@ def close_app():
 # TODO make UI nicer
 # TODO proper histogramm
 # CSS fonts for zhaw helvitca rounded bold 
-# TODO IDP LOGO inverse weisse scrhirt auf blauem hintergrund oder transpartent , sowie zhaw.ch
 # BUG closing the app does not stop all processes , fix 
+
 @app.route('/')
 def index():
-    return render_template_string("""<html>
+    return render_template_string("""<!DOCTYPE html>
+<html>
 <head>
     <title>Dice Detection System</title>
     <link rel="icon" href="{{ url_for('static', filename='logo.ico') }}" type="image/x-icon">
-
     <style>
-    @font-face {
-    font-family: 'Helvetica Rounded Bold';
-    src: url('helvetica-rounded-bold.woff2') format('woff2'),
-         url('helvetica-rounded-bold.woff') format('woff');
-    font-weight: bold;
-    font-style: normal;
-}
-    
-    
-    
+        @font-face {
+            font-family: 'Helvetica Rounded Bold';
+            src: url('helvetica-rounded-bold.woff2') format('woff2'),
+                 url('helvetica-rounded-bold.woff') format('woff');
+            font-weight: bold;
+            font-style: normal;
+        }
+
         body {
             font-family: 'Helvetica Rounded Bold', Arial, sans-serif;
             background-color: white;
             color: #333;
             margin: 0;
-            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
         }
-        .header {
+
+        .header, .footer {
             background-color: #0165A8;
             color: white;
             padding: 10px;
             text-align: center;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             z-index: 1000;
         }
-        .header h1 {
-            margin: 0;
+
+        .header {
+            min-height: 70px;
         }
+
         .footer {
-            background-color: #0165A8;
-            color: white;
-            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             text-align: right;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
-            z-index: 1000;
         }
+
         .footer img {
             max-height: 100px;
+            margin: 5px 10px;
         }
+
         .content {
-            margin: 20px;
             display: flex;
+            flex-direction: row;
             justify-content: space-around;
-            padding-top: 60px; /* Space for the fixed header */
-            padding-bottom: 60px; /* Space for the fixed footer */
+            margin: 10px; /* Margin around content */
+            flex-grow: 1;
+            overflow: auto;
         }
+
         .box {
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
             border: 2px solid #0073e6;
-            margin-bottom: 20px;
+            margin: 10px; /* Margin around each box */
             text-align: center;
-            width: 45%;
-        }
-        .box img {
-            max-width: 100%;
-            height: auto;
-        }
-        .fixed-size {
-            height: 700px;
-            overflow: hidden;
+            flex-grow: 1;
         }
     </style>
-    
 </head>
 <body>
     <div class="header">
         <h1>Dice Detection System</h1>
     </div>
+
     <div class="content">
-        <div class="box fixed-size">
+        <div class="box">
             <h2>Camera Stream</h2>
             <img src="/video_feed" alt="Camera Stream">
         </div>
-        <div class="box fixed-size">
+        
+        <div class="box">
             <h2>Histogram</h2>
             <img id="histogram" src="/plot.png" alt="Histogram">
             <button onclick="resetHistogram()">Reset Histogram</button>
         </div>
     </div>
+
     <div class="footer">
-        <img src="static/ZHAW_IDP.jpg" alt="IDP-Logo">
+        <img src="{{ url_for('static', filename='ZHAW_IDP_white.png') }}" alt="IDP-Logo">
     </div>
+
     <script>
         function refreshImage() {
             var img = document.getElementById("histogram");
             var newSrc = "/plot.png?random=" + Math.random();
             img.src = newSrc;
         }
-        setInterval(refreshImage, 1000); // Refresh every 1000 milliseconds (1 second)
+        setInterval(refreshImage, 1000); // Refresh every 1000 milliseconds
+
+        function resetHistogram() {
+            fetch('/reset_histogram', { method: 'POST' })
+            .then(response => {
+                if (response.ok) {
+                    console.log("Histogram reset successfully.");
+                    refreshImage(); // Refresh the histogram image
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
         window.onbeforeunload = function() {
             navigator.sendBeacon('/close_app');
         }
-            function resetHistogram() {
-        fetch('/reset_histogram', { method: 'POST' })
-        .then(response => {
-            if (response.ok) {
-                console.log("Histogram reset successfully.");
-                refreshImage(); // Refresh the histogram image
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
     </script>
 </body>
-</html>""")
+</html>
+""")
 
 
 
