@@ -50,7 +50,13 @@ def gen_frames():
 
     show_dice = 'Dice:  '
     show_state = 'State: '
-
+    
+    
+#   # skip factor for only proicessing some frames
+    frame_counter= 0
+    skip_factor=1
+    
+    
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -59,6 +65,11 @@ def gen_frames():
             tu.stop_workers()
             cv2.destroyAllWindows()
             break
+        
+#       # to skip frames set skip factor to > 1
+        frame_counter=(frame_counter+1)%skip_factor
+        if frame_counter!=0:
+            continue
         
         # run fast state detection 
         grayscaleframe= cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
