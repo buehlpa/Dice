@@ -20,7 +20,7 @@ from threading import Lock
 matplotlib_lock = Lock()
 
 
-RESPATH= r'C:\Users\buehl\repos\Dice\rasperry_run\results'
+RESPATH= 'results'#C:\Users\buehl\repos\Dice\rasperry_run\
 
 
 def append_to_csv(path, dice_sum):
@@ -82,11 +82,6 @@ def gen_frames():
         # ov    
         cv2.putText(frame, show_state, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
         cv2.putText(frame, show_dice, (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-
-        
-        
-        
-        
         
         # send image to flask app
         _, buffer = cv2.imencode('.jpg', frame)
@@ -128,7 +123,7 @@ def reset_histogram():
 
 @app.route('/plot.png')
 def plot_png():
-    data_path = r'C:\Users\buehl\repos\Dice\rasperry_run\results\res.csv'  # Replace with your CSV file path
+    data_path = os.path.join(RESPATH, 'res.csv')  # Replace with your CSV file path
     column_name = 'Numbers'         # Replace with the column name
     img = plot_histogram(data_path, column_name)
     return send_file(img, mimetype='image/png')
@@ -145,6 +140,8 @@ def close_app():
         cap.release()
     cv2.destroyAllWindows()
     tu.stop_workers()
+
+
 
 # TODO make UI nicer
 # TODO proper histogramm
@@ -281,4 +278,4 @@ def open_browser():
 
 if __name__ == '__main__':
     threading.Timer(0.5, open_browser).start()
-    app.run(host='0.0.0.0', port=5000,debug=True)
+    app.run(host='0.0.0.0', port=5000)
