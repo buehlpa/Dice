@@ -15,8 +15,9 @@ A project to display Computer Vision Machine Learning and Statistics in a playfu
 
 ![image](https://github.com/buehlpa/Dice/assets/64488738/fd4a8571-5fa6-4f02-b250-deed9eec609a)
 
-
-
+### Design idea UI
+![image](https://github.com/buehlpa/Dice/assets/64488738/2a4dc3b3-5686-4d68-9fb6-1d5ca8d5495a)
+on https://www.figma.com/file/oRGuXysyW7hTBrhbO4EsVx/Untitled?type=design&node-id=0-1&mode=design&t=oz88kYr1ya95I1KI-0
 ## Installation on UNIX
 
 - clone Repo
