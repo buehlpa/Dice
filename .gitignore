@@ -2,8 +2,9 @@
 *.tflite
 *.jpg
 
-!static/**
-
+!static/*.png
+!static/*.jpg
+!static/*.ico
 
 /yolov5
 /myenv
