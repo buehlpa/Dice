@@ -1,15 +1,16 @@
-*.png
-*.tflite
-*.jpg
-
+# Allow specific image files in the static folder
 !static/*.png
 !static/*.jpg
 !static/*.ico
 
+# Global ignore rules for image files
+
+*.tflite
+
 /yolov5
 /myenv
 /myenv2
-
+/data/
 
 *.pyc
 # Byte-compiled / optimized / DLL files
