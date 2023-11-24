@@ -3,6 +3,7 @@ import utils.threading_utils as tu
 # import utils.multiprocessing_utils as tu # works but only 1 fps faster than threading ..
 
 import time
+import signal
 
 from utils.state_predictor import StateDetector
 from io import BytesIO
@@ -47,6 +48,11 @@ def append_to_csv(path, dice_sum):
 def gen_frames():
     global cap
     cap = cv2.VideoCapture(0)
+    # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+    # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+    
+    
+    
     if not cap.isOpened():
         print("Cannot open camera")
         exit()
@@ -67,10 +73,6 @@ def gen_frames():
     show_state = 'State: '
     
     
-#   # skip factor for only processing some frames
-    frame_counter= 0
-    skip_factor=1
-    
     
     while True:
         ret, frame = cap.read()
@@ -80,11 +82,6 @@ def gen_frames():
             tu.stop_workers()
             cv2.destroyAllWindows()
             break
-        
-#       # to skip frames set skip factor to > 1
-        frame_counter=(frame_counter+1)%skip_factor
-        if frame_counter!=0:
-            continue
         
         # run fast state detection 
         grayscaleframe= cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -99,10 +96,16 @@ def gen_frames():
         # if dice prediction is available, show it    
         dice_prediction = tu.get_dice_prediction()
         if dice_prediction:
+            # TODO in the dice predicition function, save the image of the cutted dice ->> show it in an image box
             dice_sum, dice_pass = dice_prediction
-            show_dice = f'Dice: {dice_sum}'
-            append_to_csv(RESPATH, dice_sum)
             
+            if dice_pass:
+                show_dice = f'Dice: {dice_sum}'
+                append_to_csv(RESPATH, dice_sum)
+            else:
+                # TODO add a check if the dice pass is true, if not, SHOW : INVALID THROW, Please try again!
+                show_dice = f'Dice: {dice_sum}'
+                append_to_csv(RESPATH, dice_sum)
         
         # overlay state and dice
         cv2.putText(frame, show_state, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
@@ -120,8 +123,7 @@ def gen_frames():
             
         # Display FPS on the frame
         cv2.putText(frame, f'FPS: {fps:.2f}', (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-
-        # send image to flask app
+        #send image to flask app
         _, buffer = cv2.imencode('.jpg', frame)
         displayframe = buffer.tobytes()
         yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + displayframe + b'\r\n')
@@ -143,7 +145,6 @@ def place_image(ax, img_path, xy, zoom=1):
     ax.add_artist(ab)
 
 
-
 # plot histogram
 def plot_histogram(data_path, column_name):
     with matplotlib_lock:
@@ -152,20 +153,22 @@ def plot_histogram(data_path, column_name):
         # plt.title(f'Histogram of {column_name}')
         # plt.xlabel(column_name)
         # plt.ylabel('Frequency')  
-        rolls=list(df[column_name])
-        
+        rolls=list(df[column_name])      
         # Theoretical distribution for a fair dice (uniform distribution)
         fair_probs = [1/6] * 6  # Since each outcome (1-6) has an equal probability
-        # Counting the frequency of each outcome for the unfair dice
-        unfair_probs = [rolls.count(i) / len(rolls) for i in range(1, 7)]
-        observed_frequencies = [rolls.count(i) for i in range(1, 7)]
-        expected_frequencies = [len(rolls) / 6] * 6
-        chi_squared_stat, p_value = chisquare(observed_frequencies, f_exp=expected_frequencies)
-        # Create the plot
+        
+        if len(rolls) != 0:
+            # Counting the frequency of each outcome for the unfair dice
+            unfair_probs = [rolls.count(i) / len(rolls) for i in range(1, 7)]
+            observed_frequencies = [rolls.count(i) for i in range(1, 7)]
+            expected_frequencies = [len(rolls) / 6] * 6
+            chi_squared_stat, p_value = chisquare(observed_frequencies, f_exp=expected_frequencies)
+            # Create the plot
         fig, ax = plt.subplots()
         # Plotting the bar charts
         ax.bar(range(1, 7), fair_probs, alpha=0.3, color='blue', label='Theoretisch', width=0.4)
-        ax.bar([x + 0.4 for x in range(1, 7)], unfair_probs, alpha=0.5, color='red', label='Gewürfelt', width=0.4)
+        if len(rolls) != 0:
+            ax.bar([x + 0.4 for x in range(1, 7)], unfair_probs, alpha=0.5, color='red', label='Gewürfelt', width=0.4)
         # Remove numerical x-tick labels and place images instead
         ax.set_xticks(range(1, 7))
         ax.set_xticklabels([])  # Remove x-tick labels
@@ -173,7 +176,10 @@ def plot_histogram(data_path, column_name):
         for i in range(1, 7):
             place_image(ax, os.path.join(STATPATH, f'side{i}.jpg'), xy=(i, 0), zoom=0.04)
         # Adding title and legend
-        plt.title(f'Häufigkeiten von Würfelergebnissen, Anzahl Würfe: {len(rolls)} p= {p_value:.3f}')
+        if len(rolls) != 0:
+            plt.title(f'Häufigkeiten von Würfelergebnissen, Anzahl Würfe: {len(rolls)} p= {p_value:.3f}')
+        else:
+            plt.title(f'Häufigkeiten von Würfelergebnissen, Anzahl Würfe: {len(rolls)}')
         plt.legend()
         # Adjusting the x-axis label position
         plt.xlabel('Würfel Augen', labelpad=30)
@@ -214,18 +220,24 @@ def video_feed():
 @app.route('/close_app', methods=['POST'])
 def close_app():
     global cap
-    if cap.isOpened():
-        cap.release()
-    cv2.destroyAllWindows()
-    tu.stop_workers()
+    try:
+        if cap.isOpened():
+            cap.release()
+        cv2.destroyAllWindows()
+        tu.stop_workers()
+        
+        os.kill(os.getpid(), signal.SIGTERM)
+        return "Closed Successfully", 200  # Return a success message with a 200 OK status
+    except Exception as e:
+        return str(e), 500  # Return the error message with a 500 Internal Server Error status if something goes wrong
+
 
 
 
 # TODO make UI nicer
 # TODO proper histogramm
+# TODO put flask structure correctly
 # CSS fonts for zhaw helvitca rounded bold 
-# BUG closing the app does not stop all processes , fix 
-
 @app.route('/')
 def index():
     return render_template_string("""<!DOCTYPE html>
@@ -291,11 +303,28 @@ def index():
             justify-content: center;
             flex-direction: column;
             align-items: center;
-            border: 2px solid #0073e6;
+            border: 2px solid #0165A8;
             margin: 10px; /* Margin around each box */
             text-align: center;
             flex-grow: 1;
         }
+        
+        .video-frame {
+            border: 2px solid #0165A8;
+            padding: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .video-frame img {
+            border-radius: 10px;  /* Optional: for rounded corners on the video */
+        }        
+        
+        
     </style>
 </head>
 <body>
@@ -304,12 +333,12 @@ def index():
     </div>
 
     <div class="content">
-        <div class="box">
+        <div class="box video-frame">
             <h2>Camera Stream</h2>
             <img src="/video_feed" alt="Camera Stream">
         </div>
         
-        <div class="box">
+        <div class="box video-frame">
             <h2>Histogram</h2>
             <img id="histogram" src="/plot.png" alt="Histogram">
             <button onclick="resetHistogram()">Reset Histogram</button>

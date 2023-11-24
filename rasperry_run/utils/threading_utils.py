@@ -23,6 +23,7 @@ def dice_worker():
             dice_predicted_sum, dice_prediction_pass = get_sum_in_image(frame)
             dice_output_queue.put((dice_predicted_sum, dice_prediction_pass))
         except Exception as e:
+            print(f"An error occurred in dice_worker: {e}")
             dice_output_queue.put(e)
 
 def start_workers():
