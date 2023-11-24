@@ -2,10 +2,9 @@
 !static/*.png
 !static/*.jpg
 !static/*.ico
-
+!model_single_dices.tflite
 # Global ignore rules for image files
 
-*.tflite
 
 /yolov5
 /myenv
