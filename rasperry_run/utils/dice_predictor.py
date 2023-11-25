@@ -32,7 +32,7 @@ def process_image(img):
     # algorithm to mask the green background, isolate each dice in an image .
 
     Args:
-        img: A numpy array representing the input image.
+        img: A numpy  array representing the input image. RGB image
 
     Returns:
         A tuple containing:
