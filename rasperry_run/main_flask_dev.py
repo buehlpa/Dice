@@ -1,11 +1,13 @@
 # either multiprocessing or threading
-import utils.threading_utils as tu
+# import utils.threading_utils as tu
 # import utils.multiprocessing_utils as tu # works but only 1 fps faster than threading ..
 
 import time
 import signal
 
+from utils.DicePredictorThread import DicePredictorThread
 from utils.state_predictor import StateDetector
+
 from io import BytesIO
 import cv2
 from flask import Flask, Response, request, render_template_string,send_file
@@ -50,18 +52,18 @@ def gen_frames():
     cap = cv2.VideoCapture(0)
     # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
     # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
-    
-    
-    
     if not cap.isOpened():
         print("Cannot open camera")
         exit()
     
+    dice_detector=DicePredictorThread()
+    # start the workes , either multiprocessing or threading
+    dice_detector.start_workers()
+    
     # TODO add calibration functionality 
     state_detector = StateDetector(threshold=0.1, moving_treshold =10, max_frames_stack=4,imshape=(480, 640))
     
-    # start the workes , either multiprocessing or threading
-    tu.start_workers()
+
     
     #for fps calculation
 
@@ -79,7 +81,7 @@ def gen_frames():
         if not ret:
             print("Can't receive frame (stream end?). Exiting ...")
             cap.release()
-            tu.stop_workers()
+            #tu.stop_workers()
             cv2.destroyAllWindows()
             break
         
@@ -91,10 +93,10 @@ def gen_frames():
         # if state detector returned capture = True, enqueue the frame for dice detection 
         if capture:
             frame_resized = cv2.resize(frame, (224, 224))
-            tu.enqueue_frame_for_dice(frame_resized)
+            dice_detector.enqueue_frame_for_dice(frame_resized)
             
         # if dice prediction is available, show it    
-        dice_prediction = tu.get_dice_prediction()
+        dice_prediction = dice_detector.get_dice_prediction()
         if dice_prediction:
             # TODO in the dice predicition function, save the image of the cutted dice ->> show it in an image box
             dice_sum, dice_pass = dice_prediction
@@ -193,7 +195,7 @@ def plot_histogram(data_path, column_name):
         return img
 
 
-
+####### app routing
 app = Flask(__name__)
 
 @app.route('/reset_histogram', methods=['POST'])
@@ -223,8 +225,8 @@ def close_app():
     try:
         if cap.isOpened():
             cap.release()
-        cv2.destroyAllWindows()
-        tu.stop_workers()
+        #cv2.destroyAllWindows()
+        #tu.stop_workers()
         
         os.kill(os.getpid(), signal.SIGTERM)
         return "Closed Successfully", 200  # Return a success message with a 200 OK status

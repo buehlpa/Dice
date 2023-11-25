@@ -46,7 +46,6 @@ def gen_frames():
             print("Can't receive frame (stream end?). Exiting ...")
             cap.release()
             tu.stop_workers()
-            cv2.destroyAllWindows()
             break
         
         # run fast state detection 

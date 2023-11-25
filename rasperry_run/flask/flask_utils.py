@@ -88,7 +88,6 @@ def close_app():
     try:
         if cap.isOpened():
             cap.release()
-        cv2.destroyAllWindows()
         tu.stop_workers()
         
         os.kill(os.getpid(), signal.SIGTERM)
