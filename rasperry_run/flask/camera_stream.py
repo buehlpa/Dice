@@ -1,5 +1,5 @@
 
-import utils.threading_utils as tu
+import rasperry_run.depreceated.threading_utils as tu
 import time
 import cv2
 from utils.state_predictor import StateDetector

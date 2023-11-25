@@ -1,7 +1,7 @@
 # main.py
 
 import cv2
-import utils.threading_utils as tu
+import rasperry_run.depreceated.threading_utils as tu
 
 # Initialize webcam
 cap = cv2.VideoCapture(0)

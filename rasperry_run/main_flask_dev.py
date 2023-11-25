@@ -1,35 +1,36 @@
-# either multiprocessing or threading
-# import utils.threading_utils as tu
-# import utils.multiprocessing_utils as tu # works but only 1 fps faster than threading ..
-
+#misc
 import time
-import signal
+import cv2
+import pandas as pd
+import threading
 
+# own utils
 from utils.DicePredictorThread import DicePredictorThread
 from utils.state_predictor import StateDetector
 
+#flask
 from io import BytesIO
-import cv2
+import os
 from flask import Flask, Response, request, render_template_string,send_file
 import webbrowser
-import pandas as pd
-import matplotlib.pyplot as plt
-import threading
-import os
+import signal
+
+# logger
 import logging
 log = logging.getLogger('werkzeug')
 log.disabled = True
 
-from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+# plotting
 from scipy.stats import chisquare
-
-# lock matqplotlib for multithreading
-import matplotlib
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+import matplotlib.pyplot as plt
+import matplotlib# lock matqplotlib for multithreading
 matplotlib.use('Agg') 
 from threading import Lock
 matplotlib_lock = Lock()
 
 
+# PATHS
 RESPATH= 'results'#C:\Users\buehl\repos\Dice\rasperry_run\
 STATPATH= 'static'
 
@@ -45,7 +46,6 @@ def append_to_csv(path, dice_sum):
         df.to_csv(csv_file, mode='a', header=False, index=False)
 
 
-
 # camerastream + models 
 def gen_frames():
     global cap
@@ -56,33 +56,30 @@ def gen_frames():
         print("Cannot open camera")
         exit()
     
+    # initiate dice detector and start separate thread
     dice_detector=DicePredictorThread()
-    # start the workes , either multiprocessing or threading
     dice_detector.start_workers()
     
-    # TODO add calibration functionality 
+    # TODO add calibration functionality
+    # initiate state detector 
     state_detector = StateDetector(threshold=0.1, moving_treshold =10, max_frames_stack=4,imshape=(480, 640))
     
 
-    
     #for fps calculation
-
     frame_count = 0
     start_time = time.time()
     fps = 1
-    # initiate states
+    
+    # initiate states for overlay on image
     show_dice = 'Dice:  '
     show_state = 'State: '
     
-    
-    
+    # frame loop 
     while True:
         ret, frame = cap.read()
         if not ret:
             print("Can't receive frame (stream end?). Exiting ...")
             cap.release()
-            #tu.stop_workers()
-            cv2.destroyAllWindows()
             break
         
         # run fast state detection 
@@ -109,22 +106,21 @@ def gen_frames():
                 show_dice = f'Dice: {dice_sum}'
                 append_to_csv(RESPATH, dice_sum)
         
-        # overlay state and dice
-        cv2.putText(frame, show_state, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-        cv2.putText(frame, show_dice, (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-        
         
         # Calculate and display FPS
         frame_count += 1
-        # Calculate elapsed time
         elapsed_time = time.time() - start_time
         if elapsed_time >= 1.0:  # Update FPS every second
             fps = int(frame_count / elapsed_time)
             frame_count = 0
             start_time = time.time()
             
-        # Display FPS on the frame
+    
+        # overlay state, dicecount and  FPS on the frame
+        cv2.putText(frame, show_state, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+        cv2.putText(frame, show_dice, (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
         cv2.putText(frame, f'FPS: {fps:.2f}', (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+                
         #send image to flask app
         _, buffer = cv2.imencode('.jpg', frame)
         displayframe = buffer.tobytes()
@@ -136,19 +132,18 @@ def gen_frames():
 def place_image(ax, img_path, xy, zoom=1):
     # Load the image
     img = plt.imread(img_path)
-    
     # Create an OffsetImage
     imagebox = OffsetImage(img, zoom=zoom)
-    
     # Create an AnnotationBbox
     ab = AnnotationBbox(imagebox, xy, frameon=True, xybox=(10, -15), boxcoords="offset points", pad=0)
-    
     # Add it to the axes
     ax.add_artist(ab)
 
 
 # plot histogram
 def plot_histogram(data_path, column_name):
+    
+    # TODO error thrown when flaots in csv -> handle
     with matplotlib_lock:
         df = pd.read_csv(data_path)
         #df[column_name].hist()
@@ -214,7 +209,6 @@ def plot_png():
     img = plot_histogram(data_path, column_name)
     return send_file(img, mimetype='image/png')
 
-
 @app.route('/video_feed')
 def video_feed():
     return Response(gen_frames(),mimetype='multipart/x-mixed-replace; boundary=frame')
@@ -225,9 +219,7 @@ def close_app():
     try:
         if cap.isOpened():
             cap.release()
-        #cv2.destroyAllWindows()
-        #tu.stop_workers()
-        
+            
         os.kill(os.getpid(), signal.SIGTERM)
         return "Closed Successfully", 200  # Return a success message with a 200 OK status
     except Exception as e:

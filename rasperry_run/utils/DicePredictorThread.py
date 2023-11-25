@@ -3,8 +3,7 @@ import threading
 import queue
 import numpy as np
 
-#from utils.eyes_predictor import * # uncomment on raspebrry pi, comment on locac
-
+#from utils.dice_predictor import * # uncomment on raspebrry pi, comment on locac
 
 import random
 def get_sum_in_image(frame):
