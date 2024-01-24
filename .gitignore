@@ -1,9 +1,20 @@
 # Allow specific image files in the static folder
-!static/*.png
-!static/*.jpg
-!static/*.ico
+!rasperry_run/static/*.png
+!rasperry_run/static/*.jpg
+!rasperry_run/static/*.ico
 !model_single_dices.tflite
 # Global ignore rules for image files
+
+
+*.png
+*.jpg
+*.ico
+*.tflite
+*.pb
+*.pbtxt
+*.ckpt
+*.ckpt.*
+*.pbtxt
 
 
 /yolov5
