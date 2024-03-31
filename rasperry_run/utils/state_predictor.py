@@ -1,15 +1,17 @@
 from collections import deque
 import numpy as np
 import cv2
-
+import json
 
 class StateDetector:
-    def __init__(self, threshold=0.1, moving_treshold =0.001, max_frames_stack=4,imshape=(480,640)):
+    def __init__(self,calibration_file='configuration/state_calibration.json', max_frames_stack=4,imshape=(480,640)):
         
         
-        # TODO write calibration function to calculate the threshold and moving_treshold from the empty images IO for a calibration file
-        self.threshold = threshold
-        self.moving_treshold = moving_treshold
+        with open(calibration_file) as f:
+            calibration_dict = json.load(f)
+        self.threshold = calibration_dict['state_threshold']
+        self.moving_treshold = calibration_dict['moving_threshold']
+        
         self.state_stack_lock = False
         self.queue =deque(maxlen=max_frames_stack)
         self.imshape=imshape
@@ -17,7 +19,7 @@ class StateDetector:
         
     def get_scene_state(self,frame):
         try:
-            # input is a frame in onechhannell grayscale with 0-255 range
+            # input is a frame in one chhannell grayscale with 0-255 range
             frame = cv2.resize(frame, self.imshape[::-1])
             
             framescaled=frame/ 255.

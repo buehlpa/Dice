@@ -60,12 +60,9 @@ def gen_frames():
     dice_detector=DicePredictorThread()
     dice_detector.start_workers()
     
-    # TODO add calibration functionality
-    
-    
-    
-    # initiate state detector  # TODO change stateDector , to path configuration..
-    state_detector = StateDetector(threshold=0.1, moving_treshold =10, max_frames_stack=4,imshape=(480, 640))
+    # IF you want to calibrate camera run separate calibration script 
+    # initiate state detector  
+    state_detector = StateDetector(calibration_file='configuration/state_calibration.json', max_frames_stack=4,imshape=(480, 640))
     
 
     #for fps calculation
