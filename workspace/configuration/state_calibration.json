@@ -1,2 +1,1 @@
-{"state_threshold":0.55,
-"moving_threshold":0.001}
+{"state_threshold": 0.5, "moving_threshold": 0.001}
