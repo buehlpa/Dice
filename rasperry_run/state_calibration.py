@@ -1,8 +1,12 @@
 import cv2
 import numpy as np
 import seaborn as sns
+import matplotlib
+matplotlib.use('TkAgg')  # Set the backend explicitly
 import matplotlib.pyplot as plt
 import json
+
+
 
 def calibrate_state(calibration_file="configuration/state_calibration.json"):
     print("Calibration process started , wait for camera window to show & follow the instructions there...")
