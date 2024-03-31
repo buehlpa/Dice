@@ -174,6 +174,7 @@ def get_sum_in_image(img):
         prediction_dice = np.argmax(output_data_dice)
         dice_label = class_labels_dice[prediction_dice]
         sum_in_image+=int(dice_label)
+        
     return sum_in_image , prediction_state
 
 

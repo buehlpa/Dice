@@ -50,8 +50,8 @@ def append_to_csv(path, dice_sum):
 def gen_frames():
     global cap
     cap = cv2.VideoCapture(0)
-    # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
-    # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+    cap.set(cv2.CAP_PROP_EXPOSURE, 50)
+    
     if not cap.isOpened():
         print("Cannot open camera")
         exit()
@@ -61,7 +61,10 @@ def gen_frames():
     dice_detector.start_workers()
     
     # TODO add calibration functionality
-    # initiate state detector 
+    
+    
+    
+    # initiate state detector  # TODO change stateDector , to path configuration..
     state_detector = StateDetector(threshold=0.1, moving_treshold =10, max_frames_stack=4,imshape=(480, 640))
     
 
