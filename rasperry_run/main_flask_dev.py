@@ -323,7 +323,7 @@ def index():
 </head>
 <body>
     <div class="header">
-        <h1>Dice Detection System</h1>
+        <h1>Erkenne den gefälschten Würfel!</h1>
     </div>
 
     <div class="content">
