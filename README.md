@@ -1,24 +1,16 @@
 # Automatically Detect Dices 
 
  Dice detector BOX, from Zurich University of Applied Sciences (ZHAW).
- In development!
+ **In development!**
 
 A project to display Computer Vision Machine Learning and Statistics in a playful way 
 
-
-
-
-![image](https://github.com/buehlpa/Dice/assets/64488738/18d9fea4-c6ba-4b1f-8b6e-acdf607d9e47)
+![image](https://github.com/buehlpa/Dice/assets/64488738/46b51cfd-4974-4864-b354-d0685827d79d)
 
 
 ### Current UI
-
 ![image](https://github.com/buehlpa/Dice/assets/64488738/d801b7f3-2cf3-420e-bab1-dad99851a578)
 
-
-### Design idea UI
-![image](https://github.com/buehlpa/Dice/assets/64488738/2a4dc3b3-5686-4d68-9fb6-1d5ca8d5495a)
-on https://www.figma.com/file/oRGuXysyW7hTBrhbO4EsVx/Untitled?type=design&node-id=0-1&mode=design&t=oz88kYr1ya95I1KI-0
 ## Installation on UNIX
 
 - clone Repo
