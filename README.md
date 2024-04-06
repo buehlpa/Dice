@@ -1,7 +1,7 @@
 # Automatically Detect Dices 
 
  Dice detector BOX, from Zurich University of Applied Sciences (ZHAW).
- In development!
+ **In development!**
 
 A project to display Computer Vision Machine Learning and Statistics in a playful way 
 
