@@ -11,7 +11,7 @@ from utils.state_predictor import StateDetector
 #flask
 from io import BytesIO
 import os
-from flask import Flask, Response, request, render_template_string,send_file
+from flask import Flask, Response, request, render_template_string, send_file
 import webbrowser
 import signal
 
@@ -95,12 +95,12 @@ def gen_frames():
         # if dice prediction is available, show it    
         dice_prediction = dice_detector.get_dice_prediction()
         if dice_prediction:
-            # TODO in the dice predicition function, save the image of the cutted dice ->> show it in an image box
             dice_sum, dice_pass = dice_prediction
-            
+            # TODO inegrate the new dice detector here wit dict as output and outcome distribuitions
             if dice_pass:
                 show_dice = f'Dice: {dice_sum}'
                 append_to_csv(RESPATH, dice_sum)
+                
             else:
                 # TODO add a check if the dice pass is true, if not, SHOW : INVALID THROW, Please try again!
                 show_dice = f'Dice: {dice_sum}'

@@ -2,10 +2,11 @@
 import threading
 import queue
 import numpy as np
+import random
 
 #from utils.dice_predictor import * # uncomment on raspebrry pi, comment on locac
 
-import random
+
 def predict_dice(frame):
     new=random.choice([1,2,3,4,5,6]) 
     return new , True 
