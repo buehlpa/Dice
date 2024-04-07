@@ -7,6 +7,12 @@ import matplotlib.pyplot as plt
 import json
 
 
+'''
+
+by running this file yopu can determine the threshold to distingusishc still from empty scene
+'''
+
+
 
 def calibrate_state(calibration_file="configuration/state_calibration.json"):
     print("Calibration process started , wait for camera window to show & follow the instructions there...")
