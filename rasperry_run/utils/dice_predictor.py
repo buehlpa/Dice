@@ -99,7 +99,7 @@ def process_image(img):
 
 
 # predict 30 X30 image if in 1-6 
-def predict_dice(frame):
+def predict_one_dice(frame):
     """
     Predicts the number of eyes on a dice in a given frame using a pre-trained TensorFlow Lite model.
 
@@ -141,7 +141,7 @@ def predict_dice(frame):
 
 
 
-def get_sum_in_image(img):
+def predict_dice(img):
     """
     Given an image of dice, this function returns the sum of the number of eyes
     on each dice in the image.

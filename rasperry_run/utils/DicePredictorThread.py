@@ -6,7 +6,7 @@ import numpy as np
 #from utils.dice_predictor import * # uncomment on raspebrry pi, comment on locac
 
 import random
-def get_sum_in_image(frame):
+def predict_dice(frame):
     new=random.choice([1,2,3,4,5,6]) 
     return new , True 
 
@@ -24,7 +24,7 @@ class DicePredictorThread:
             if frame is None:  # Exit signal
                 break
             try:
-                dice_predicted_sum, dice_prediction_pass = get_sum_in_image(frame)
+                dice_predicted_sum, dice_prediction_pass = predict_dice(frame)
                 self.dice_output_queue.put((dice_predicted_sum, dice_prediction_pass))
             except Exception as e:
                 print(f"An error occurred in dice_worker: {e}")
