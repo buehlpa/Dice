@@ -153,6 +153,7 @@ def plot_histogram(data_path, column_name):
         # Theoretical distribution for a fair dice (uniform distribution)
         fair_probs = [1/6] * 6  # Since each outcome (1-6) has an equal probability
         
+        p_value=0
         if len(rolls) != 0:
             # Counting the frequency of each outcome for the unfair dice
             unfair_probs = [rolls.count(i) / len(rolls) for i in range(1, 7)]
@@ -166,9 +167,9 @@ def plot_histogram(data_path, column_name):
         # Plotting the bar charts
         ax.bar(range(1, 7), fair_probs, alpha=1, color='#0165A8', label='Theoretisch', width=0.4)
         
-        if column_name == 'red':
+        if len(rolls) != 0 and column_name == 'red':
             ax.bar([x + 0.4 for x in range(1, 7)], unfair_probs, alpha=0.8, color='red', label='Gewürfelt', width=0.4)
-        elif column_name == 'white':
+        elif len(rolls) != 0 and column_name == 'white':
             ax.bar([x + 0.4 for x in range(1, 7)], unfair_probs, alpha=0.8, edgecolor='black', color='white', label='Gewürfelt', width=0.4)
 
         # Remove numerical x-tick labels and place images instead
