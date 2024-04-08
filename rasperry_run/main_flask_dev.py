@@ -7,6 +7,8 @@ import threading
 # own utils
 from utils.DicePredictorThread import DicePredictorThread
 from utils.state_predictor import StateDetector
+from utils.plotting import *
+
 
 #flask
 from io import BytesIO
@@ -71,7 +73,7 @@ def gen_frames():
     fps = 1
     
     # initiate states for overlay on image
-    show_dice = 'Dice:  '
+    dice_msg = 'Dice:  '
     show_state = 'State: '
     
     # frame loop 
@@ -94,19 +96,12 @@ def gen_frames():
             
         # if dice prediction is available, show it    
         dice_prediction = dice_detector.get_dice_prediction()
+        
+        
+        
         if dice_prediction:
-            dice_sum, dice_pass = dice_prediction
-            # TODO inegrate the new dice detector here wit dict as output and outcome distribuitions
-            if dice_pass:
-                show_dice = f'Dice: {dice_sum}'
-                append_to_csv(RESPATH, dice_sum)
-                
-            else:
-                # TODO add a check if the dice pass is true, if not, SHOW : INVALID THROW, Please try again!
-                show_dice = f'Dice: {dice_sum}'
-                append_to_csv(RESPATH, dice_sum)
-        
-        
+            dice_msg= write_result(dice_prediction, filepath='result/results.csv')
+
         # Calculate and display FPS
         frame_count += 1
         elapsed_time = time.time() - start_time
@@ -118,7 +113,7 @@ def gen_frames():
     
         # overlay state, dicecount and  FPS on the frame
         cv2.putText(frame, show_state, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-        cv2.putText(frame, show_dice, (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+        cv2.putText(frame, dice_msg, (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
         cv2.putText(frame, f'FPS: {fps:.2f}', (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
                 
         #send image to flask app
@@ -146,11 +141,8 @@ def plot_histogram(data_path, column_name):
     # TODO error thrown when flaots in csv -> handle
     with matplotlib_lock:
         df = pd.read_csv(data_path)
-        #df[column_name].hist()
-        # plt.title(f'Histogram of {column_name}')
-        # plt.xlabel(column_name)
-        # plt.ylabel('Frequency')  
-        rolls=list(df[column_name])      
+    
+        rolls=df[column_name].dropna().tolist()
         # Theoretical distribution for a fair dice (uniform distribution)
         fair_probs = [1/6] * 6  # Since each outcome (1-6) has an equal probability
         
@@ -160,25 +152,28 @@ def plot_histogram(data_path, column_name):
             observed_frequencies = [rolls.count(i) for i in range(1, 7)]
             expected_frequencies = [len(rolls) / 6] * 6
             chi_squared_stat, p_value = chisquare(observed_frequencies, f_exp=expected_frequencies)
-            # Create the plot
+        
+        # Create the plot
         fig, ax = plt.subplots()
+
         # Plotting the bar charts
-        ax.bar(range(1, 7), fair_probs, alpha=0.3, color='blue', label='Theoretisch', width=0.4)
-        if len(rolls) != 0:
-            ax.bar([x + 0.4 for x in range(1, 7)], unfair_probs, alpha=0.5, color='red', label='Gewürfelt', width=0.4)
+        ax.bar(range(1, 7), fair_probs, alpha=1, color='#0165A8', label='Theoretisch', width=0.4)
+        
+        if column_name == 'red':
+            ax.bar([x + 0.4 for x in range(1, 7)], unfair_probs, alpha=0.8, color='red', label='Gewürfelt', width=0.4)
+        elif column_name == 'white':
+            ax.bar([x + 0.4 for x in range(1, 7)], unfair_probs, alpha=0.8, edgecolor='black', color='white', label='Gewürfelt', width=0.4)
+
         # Remove numerical x-tick labels and place images instead
         ax.set_xticks(range(1, 7))
         ax.set_xticklabels([])  # Remove x-tick labels
         ax.tick_params(axis='both', which='both', length=0)  # Remove axis ticks
+
         for i in range(1, 7):
             place_image(ax, os.path.join(STATPATH, f'side{i}.jpg'), xy=(i, 0), zoom=0.04)
-        # Adding title and legend
-        if len(rolls) != 0:
-            plt.title(f'Häufigkeiten von Würfelergebnissen, Anzahl Würfe: {len(rolls)} p= {p_value:.3f}')
-        else:
-            plt.title(f'Häufigkeiten von Würfelergebnissen, Anzahl Würfe: {len(rolls)}')
+            
+        plt.title(f'Häufigkeiten von Würfelergebnissen, Anzahl Würfe: {len(rolls)} p= {p_value:.3f}')
         plt.legend()
-        # Adjusting the x-axis label position
         plt.xlabel('Würfel Augen', labelpad=30)
         plt.ylabel('Relative Häufigkeit')
                 
@@ -189,25 +184,32 @@ def plot_histogram(data_path, column_name):
         plt.close()
         return img
 
-
 ####### app routing
 app = Flask(__name__)
 
 @app.route('/reset_histogram', methods=['POST'])
 def reset_histogram():
-    csv_file = os.path.join(RESPATH, 'res.csv')
-    # Reset the file by writing only the header
-    with open(csv_file, 'w') as file:
-        file.write('Numbers\n')
+    csv_file = os.path.join(RESPATH, 'results.csv')
+    results={"throw":[],"white":[],"red":[]}
+    df = pd.DataFrame(results)
+    df.to_csv(csv_file, index=False)
     return '', 204  # Return no content status
 
 
 @app.route('/plot.png')
 def plot_png():
-    data_path = os.path.join(RESPATH, 'res.csv')  # Replace with your CSV file path
-    column_name = 'Numbers'         # Replace with the column name
+    data_path = os.path.join(RESPATH, 'results.csv')  
+    column_name = 'red'      
     img = plot_histogram(data_path, column_name)
     return send_file(img, mimetype='image/png')
+
+@app.route('/plot2.png')
+def plot2_png():
+    data_path = os.path.join(RESPATH, 'results.csv')  
+    column_name = 'white'         
+    img = plot_histogram(data_path, column_name,)
+    return send_file(img, mimetype='image/png')
+
 
 @app.route('/video_feed')
 def video_feed():
@@ -232,6 +234,7 @@ def close_app():
 # TODO proper histogramm
 # TODO put flask structure correctly
 # CSS fonts for zhaw helvitca rounded bold 
+
 @app.route('/')
 def index():
     return render_template_string("""<!DOCTYPE html>
@@ -337,6 +340,12 @@ def index():
             <img id="histogram" src="/plot.png" alt="Histogram">
             <button onclick="resetHistogram()">Reset Histogram</button>
         </div>
+        
+        <div class="box video-frame">
+            <h2>Second Histogram</h2>
+            <img id="histogram2" src="/plot2.png" alt="Second Histogram">
+            <button onclick="resetSecondHistogram()">Reset Second Histogram</button>
+        </div>
     </div>
 
     <div class="footer">
@@ -349,7 +358,15 @@ def index():
             var newSrc = "/plot.png?random=" + Math.random();
             img.src = newSrc;
         }
+        
+        function refreshSecondImage() {
+            var img = document.getElementById("histogram2");
+            var newSrc = "/plot2.png?random=" + Math.random();
+            img.src = newSrc;
+        }
+        
         setInterval(refreshImage, 1000); // Refresh every 1000 milliseconds
+        setInterval(refreshSecondImage, 1000); // Refresh every 1000 milliseconds
 
         function resetHistogram() {
             fetch('/reset_histogram', { method: 'POST' })
@@ -357,6 +374,17 @@ def index():
                 if (response.ok) {
                     console.log("Histogram reset successfully.");
                     refreshImage(); // Refresh the histogram image
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+        
+        function resetSecondHistogram() {
+            fetch('/reset_second_histogram', { method: 'POST' })
+            .then(response => {
+                if (response.ok) {
+                    console.log("Second Histogram reset successfully.");
+                    refreshSecondImage(); // Refresh the second histogram image
                 }
             })
             .catch(error => console.error('Error:', error));

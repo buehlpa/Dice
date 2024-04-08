@@ -174,10 +174,12 @@ def predict_dice(frame):
     
     for img in cropped_img_red:
         dice_outcome = predict_one_dice(img)
-        resdict["red_dice"].append(dice_outcome)
+        pred_class=int(np.argmax(dice_outcome))
+        resdict["red_dice"].append(pred_class)
     for img in cropped_img_white:
         dice_outcome=predict_one_dice(img)
-        resdict["white_dice"].append(dice_outcome)  
+        pred_class=int(np.argmax(dice_outcome))
+        resdict["white_dice"].append(pred_class)  
         
     return resdict, True
 
