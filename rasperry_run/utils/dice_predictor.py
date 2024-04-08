@@ -4,7 +4,8 @@ import random
 import os
 
 import tflite_runtime.interpreter as tflite
-
+##DEBUG
+DEBUG_MODE=True
 
 # Tensorflow lite model directory
 model_dir = 'models'
@@ -55,6 +56,10 @@ def get_cropped(orig_gray,img):
     contours, _ = cv2.findContours(binary_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cropped = []
     hull_mask = np.zeros_like(binary_mask)
+    
+    
+    
+    
     # Loop over each contour
     for contour in contours:
         hull = cv2.convexHull(contour)
@@ -81,6 +86,10 @@ def get_white_red(img):
     rgb_nogreen=   remove_range(hsv_image,np.array([40, 0, 0]),np.array([90, 255, 255])) #rbg
     rgb_red = remove_range(cv2.cvtColor(rgb_nogreen, cv2.COLOR_RGB2HSV), np.array([30, 0, 0]), np.array([160, 255, 255]))
     
+    
+    if DEBUG_MODE:
+        cv2.imwrite('nogreen.jpg', rgb_nogreen)
+        
     # get cropped images for red  and the mask of the red die
     cropped_img_red , hull_mask_red =get_cropped(orig_gray,rgb_red)
 
@@ -164,21 +173,34 @@ def predict_dice(frame):
     img: opencv bgr array 
     returns: number of red and white dices, if criterion met bool
     '''
-    cropped_img_red,cropped_img_white = get_white_red(frame)
+    if DEBUG_MODE:
+        cv2.imwrite('put_predict.jpg', frame)
     
+    
+    cropped_img_red,cropped_img_white = get_white_red(frame)
+    print(f'LENGTH {len(cropped_img_red)} , LENGTH {len(cropped_img_white)}')
+    
+    if DEBUG_MODE:
+        for i in range(len(cropped_img_red)):
+            cv2.imwrite(f'cropped_red{i}.jpg', cropped_img_red[i])
+        for i in range(len(cropped_img_white)):
+            cv2.imwrite(f'cropped_img_white{i}.jpg', cropped_img_white[i])
+            
+            
+    ## TODO         REURN Kriteirum ändern
     # check criterion
-    if not rerun_criterion(cropped_img_red) or not rerun_criterion(cropped_img_white):
-        return {} , False    
+    #if not rerun_criterion(cropped_img_red) or not rerun_criterion(cropped_img_white):
+     #   return {} , False    
     
     resdict={"red_dice":[],"white_dice":[]}
     
     for img in cropped_img_red:
         dice_outcome = predict_one_dice(img)
-        pred_class=int(np.argmax(dice_outcome))
+        pred_class=int(np.argmax(dice_outcome)+1)
         resdict["red_dice"].append(pred_class)
     for img in cropped_img_white:
         dice_outcome=predict_one_dice(img)
-        pred_class=int(np.argmax(dice_outcome))
+        pred_class=int(np.argmax(dice_outcome)+1)
         resdict["white_dice"].append(pred_class)  
         
     return resdict, True

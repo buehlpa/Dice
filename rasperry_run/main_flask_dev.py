@@ -87,9 +87,9 @@ def gen_frames():
             cap.release()
             break
         
-        # cut the lowest part
-        frame= frame[:470,:]
-        
+        # cut the lowest part of the image
+        frame= frame[:470,:,:]
+
         # run fast state detection 
         grayscaleframe= cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         state , capture=state_detector.get_scene_state(grayscaleframe)
@@ -106,8 +106,10 @@ def gen_frames():
         if DEBUG_MODE:
             print(f'state:{state}',f'capture:{capture}',f'dice_prediction:{dice_prediction}')
         
-        if dice_prediction:
-            dice_msg= write_result(dice_prediction, filepath='result/results.csv')
+        
+        #TODO SChreibkriterium checken , bis hierhien läuft -> prediciton teil auch
+        #if dice_prediction:
+         #   dice_msg= write_result(dice_prediction, filepath='result/results.csv')
         
         # Calculate and display FPS
         frame_count += 1
