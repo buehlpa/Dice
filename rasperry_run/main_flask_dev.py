@@ -31,6 +31,9 @@ matplotlib.use('Agg')
 from threading import Lock
 matplotlib_lock = Lock()
 
+# DEBUG MODE
+DEBUG_MODE=True
+
 
 # PATHS
 RESPATH= 'results'#C:\Users\buehl\repos\Dice\rasperry_run\
@@ -84,6 +87,9 @@ def gen_frames():
             cap.release()
             break
         
+        # cut the lowest part
+        frame= frame[:470,:]
+        
         # run fast state detection 
         grayscaleframe= cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         state , capture=state_detector.get_scene_state(grayscaleframe)
@@ -97,11 +103,12 @@ def gen_frames():
         # if dice prediction is available, show it    
         dice_prediction = dice_detector.get_dice_prediction()
         
-        
+        if DEBUG_MODE:
+            print(f'state:{state}',f'capture:{capture}',f'dice_prediction:{dice_prediction}')
         
         if dice_prediction:
             dice_msg= write_result(dice_prediction, filepath='result/results.csv')
-
+        
         # Calculate and display FPS
         frame_count += 1
         elapsed_time = time.time() - start_time
@@ -112,9 +119,9 @@ def gen_frames():
             
     
         # overlay state, dicecount and  FPS on the frame
-        cv2.putText(frame, show_state, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-        cv2.putText(frame, dice_msg, (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-        cv2.putText(frame, f'FPS: {fps:.2f}', (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+        cv2.putText(frame, show_state, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_AA)
+        cv2.putText(frame, dice_msg, (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_AA)
+        #cv2.putText(frame, f'FPS: {fps:.2f}', (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
                 
         #send image to flask app
         _, buffer = cv2.imencode('.jpg', frame)

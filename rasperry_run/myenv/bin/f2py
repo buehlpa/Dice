@@ -1,4 +1,4 @@
-#!/home/raspelbeere1991/projects/Dice/rasperry_run/myenv/bin/python
+#!/home/raspelbeere1991/Projects/Dice/rasperry_run/myenv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

@@ -12,6 +12,7 @@ class StateDetector:
         self.threshold = calibration_dict['state_threshold']
         self.moving_treshold = calibration_dict['moving_threshold']
         
+
         self.state_stack_lock = False
         self.queue =deque(maxlen=max_frames_stack)
         self.imshape=imshape
@@ -19,6 +20,7 @@ class StateDetector:
         
     def get_scene_state(self,frame):
         try:
+            
             # input is a frame in one chhannell grayscale with 0-255 range
             frame = cv2.resize(frame, self.imshape[::-1])
             
@@ -31,7 +33,6 @@ class StateDetector:
             
             
             difference =np.linalg.norm(framescaled-self.last_frame) #np.sqrt((framescaled - self.last_frame)**2) #L2
-            
             self.last_frame = framescaled
             
             state = "undecided"

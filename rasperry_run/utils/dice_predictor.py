@@ -168,7 +168,7 @@ def predict_dice(frame):
     
     # check criterion
     if not rerun_criterion(cropped_img_red) or not rerun_criterion(cropped_img_white):
-        return _ , False    
+        return {} , False    
     
     resdict={"red_dice":[],"white_dice":[]}
     
