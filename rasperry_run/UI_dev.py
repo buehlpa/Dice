@@ -1,12 +1,19 @@
+
+######################################
+
+
+# THIS FILE DOES NOT CONTAIN THE PREDCITION MODEL
+## JUst use thios for UI DEV
+
+####################################
+
+
 #misc
 import time
 import cv2
 import pandas as pd
 import threading
 
-# own utils
-from utils.DicePredictorThread import DicePredictorThread
-from utils.state_predictor import StateDetector
 from utils.plotting import write_result, plot_histogram
 from utils.argparser import load_and_parse_args
 
@@ -45,24 +52,11 @@ def gen_frames():
         print("Cannot open camera")
         exit()
     
-    # initiate dice detector and start separate thread
-    dice_detector=DicePredictorThread()
-    dice_detector.start_workers()
-    
-    # IF you want to calibrate camera run separate calibration script 
-    # initiate state detector  
-    state_detector = StateDetector(calibration_file='configuration/state_calibration.json', max_frames_stack=4,imshape=(480, 640))
-    
-
     #for fps calculation
     frame_count = 0
     start_time = time.time()
     fps = 1
-    
-    # initiate states for overlay on image
-    dice_msg = 'Dice:  '
-    state_msg = 'State: '
-    
+
     # frame loop 
     while True:
         ret, frame = cap.read()
@@ -74,28 +68,6 @@ def gen_frames():
         # cut the lowest part of the image
         frame= frame[:470,:,:]
 
-        # run fast state detection 
-        grayscaleframe= cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        state , capture=state_detector.get_scene_state(grayscaleframe)
-        state_msg = f'State: {state}'
-        
-        # if state detector returned capture = True, enqueue the frame for dice detection 
-        if capture:
-            frame_resized = cv2.resize(frame, (224, 224))
-            dice_detector.enqueue_frame_for_dice(frame_resized)
-            
-        # if dice prediction is available, show it    
-        dice_prediction = dice_detector.get_dice_prediction()
-        
-        if DEBUG_MODE:
-            print(f'state:{state}',f'capture:{capture}',f'dice_prediction:{dice_prediction}')
-        
-        
-        #TODO SChreibkriterium checken , bis hierhien läuft -> prediciton teil auch
-        #if dice_prediction:
-         #   dice_msg= write_result(dice_prediction, filepath='result/results.csv')
-        
-        # Calculate and display FPS
         frame_count += 1
         elapsed_time = time.time() - start_time
         if elapsed_time >= 1.0:  # Update FPS every second
@@ -103,10 +75,6 @@ def gen_frames():
             frame_count = 0
             start_time = time.time()
             
-    
-        # overlay state, dicecount and  FPS on the frame
-        cv2.putText(frame, state_msg, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_AA)
-        cv2.putText(frame, dice_msg, (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_AA)
         cv2.putText(frame, f'FPS: {fps:.2f}', (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA) 
                 
         #send image to flask app
