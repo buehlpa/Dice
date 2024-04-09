@@ -7,12 +7,11 @@ import threading
 # own utils
 from utils.DicePredictorThread import DicePredictorThread
 from utils.state_predictor import StateDetector
-from utils.plotting import *
+from utils.plotting import write_result, plot_histogram
 from utils.argparser import load_and_parse_args
 
 
 #flask
-from io import BytesIO
 import os
 from flask import Flask, Response, request, render_template_string, send_file
 import webbrowser
@@ -23,14 +22,6 @@ import logging
 log = logging.getLogger('werkzeug')
 log.disabled = True
 
-# plotting
-from scipy.stats import chisquare
-from matplotlib.offsetbox import OffsetImage, AnnotationBbox
-import matplotlib.pyplot as plt
-import matplotlib# lock matqplotlib for multithreading
-matplotlib.use('Agg') 
-from threading import Lock
-matplotlib_lock = Lock()
 
 # DEBUG MODE
 DEBUG_MODE=True
@@ -38,6 +29,10 @@ DEBUG_MODE=True
 # PATHS
 RESPATH= 'results'
 STATPATH= 'static'
+
+## on local WIN os
+RESPATH=r'C:\Users\buehl\repos\Dice\rasperry_run\results'
+STATPATH=r'C:\Users\buehl\repos\Dice\rasperry_run\static'
 
 
 # camerastream + models 
@@ -120,68 +115,6 @@ def gen_frames():
         yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + displayframe + b'\r\n')
 
 
-
-# helper function to place image on histogarmmplot
-def place_image(ax, img_path, xy, zoom=1):
-    # Load the image
-    img = plt.imread(img_path)
-    # Create an OffsetImage
-    imagebox = OffsetImage(img, zoom=zoom)
-    # Create an AnnotationBbox
-    ab = AnnotationBbox(imagebox, xy, frameon=True, xybox=(10, -15), boxcoords="offset points", pad=0)
-    # Add it to the axes
-    ax.add_artist(ab)
-
-
-# plot histogram
-def plot_histogram(data_path, column_name):
-    
-    # TODO error thrown when flaots in csv -> handle
-    with matplotlib_lock:
-        df = pd.read_csv(data_path)
-    
-        rolls=df[column_name].dropna().tolist()
-        # Theoretical distribution for a fair dice (uniform distribution)
-        fair_probs = [1/6] * 6  # Since each outcome (1-6) has an equal probability
-        
-        p_value=0
-        if len(rolls) != 0:
-            # Counting the frequency of each outcome for the unfair dice
-            unfair_probs = [rolls.count(i) / len(rolls) for i in range(1, 7)]
-            observed_frequencies = [rolls.count(i) for i in range(1, 7)]
-            expected_frequencies = [len(rolls) / 6] * 6
-            chi_squared_stat, p_value = chisquare(observed_frequencies, f_exp=expected_frequencies)
-        
-        # Create the plot
-        fig, ax = plt.subplots()
-
-        # Plotting the bar charts
-        ax.bar(range(1, 7), fair_probs, alpha=1, color='#0165A8', label='Theoretisch', width=0.4)
-        
-        if len(rolls) != 0 and column_name == 'red':
-            ax.bar([x + 0.4 for x in range(1, 7)], unfair_probs, alpha=0.8, color='red', label='Gewürfelt', width=0.4)
-        elif len(rolls) != 0 and column_name == 'white':
-            ax.bar([x + 0.4 for x in range(1, 7)], unfair_probs, alpha=0.8, edgecolor='black', color='white', label='Gewürfelt', width=0.4)
-
-        # Remove numerical x-tick labels and place images instead
-        ax.set_xticks(range(1, 7))
-        ax.set_xticklabels([])  # Remove x-tick labels
-        ax.tick_params(axis='both', which='both', length=0)  # Remove axis ticks
-
-        for i in range(1, 7):
-            place_image(ax, os.path.join(STATPATH, f'side{i}.jpg'), xy=(i, 0), zoom=0.04)
-            
-        plt.title(f'Häufigkeiten von Würfelergebnissen, Anzahl Würfe: {len(rolls)} p= {p_value:.3f}')
-        plt.legend()
-        plt.xlabel('Würfel Augen', labelpad=30)
-        plt.ylabel('Relative Häufigkeit')
-                
-
-        img = BytesIO()
-        plt.savefig(img, format='png')
-        img.seek(0)
-        plt.close()
-        return img
 
 ####### app routing
 app = Flask(__name__)
