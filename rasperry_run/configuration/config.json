@@ -1,0 +1,16 @@
+{
+"RESPATH":"results",
+"STATPATH": "static",
+"MODELPATH": "models",
+"model_file": "model_single_dices.tflite",
+"state_threshold": 0.6, 
+"moving_threshold":3.0,
+"max_frames_stack":4,
+"CAP_PROP_EXPOSURE":50,
+"DEBUG_MODE":True,
+"frame_cut_x":470,
+"hsv_remove_green_lower": [40, 0, 0],
+"hsv_remove_green_upper": [90, 255, 255],
+"hsv_remove_red_lower": [30, 0, 0],
+"hsv_remove_red_upper": [160, 255, 255], 
+}

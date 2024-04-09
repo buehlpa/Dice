@@ -8,6 +8,7 @@ import threading
 from utils.DicePredictorThread import DicePredictorThread
 from utils.state_predictor import StateDetector
 from utils.plotting import *
+from utils.argparser import load_and_parse_args
 
 
 #flask
@@ -34,21 +35,9 @@ matplotlib_lock = Lock()
 # DEBUG MODE
 DEBUG_MODE=True
 
-
 # PATHS
-RESPATH= 'results'#C:\Users\buehl\repos\Dice\rasperry_run\
+RESPATH= 'results'
 STATPATH= 'static'
-
-
-### append to results file
-def append_to_csv(path, dice_sum):
-    csv_file = os.path.join(path, 'res.csv')
-    df = pd.DataFrame({'Numbers': [dice_sum]})
-    # If the file does not exist, create it with header, else append without header
-    if not os.path.isfile(csv_file):
-        df.to_csv(csv_file, mode='w', header=True, index=False)
-    else:
-        df.to_csv(csv_file, mode='a', header=False, index=False)
 
 
 # camerastream + models 
@@ -77,7 +66,7 @@ def gen_frames():
     
     # initiate states for overlay on image
     dice_msg = 'Dice:  '
-    show_state = 'State: '
+    state_msg = 'State: '
     
     # frame loop 
     while True:
@@ -93,7 +82,7 @@ def gen_frames():
         # run fast state detection 
         grayscaleframe= cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         state , capture=state_detector.get_scene_state(grayscaleframe)
-        show_state = f'State: {state}'
+        state_msg = f'State: {state}'
         
         # if state detector returned capture = True, enqueue the frame for dice detection 
         if capture:
@@ -121,7 +110,7 @@ def gen_frames():
             
     
         # overlay state, dicecount and  FPS on the frame
-        cv2.putText(frame, show_state, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_AA)
+        cv2.putText(frame, state_msg, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_AA)
         cv2.putText(frame, dice_msg, (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_AA)
         #cv2.putText(frame, f'FPS: {fps:.2f}', (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
                 
@@ -199,12 +188,13 @@ app = Flask(__name__)
 
 @app.route('/reset_histogram', methods=['POST'])
 def reset_histogram():
+    '''resets results file to an empty csv'''
+    
     csv_file = os.path.join(RESPATH, 'results.csv')
     results={"throw":[],"white":[],"red":[]}
     df = pd.DataFrame(results)
     df.to_csv(csv_file, index=False)
     return '', 204  # Return no content status
-
 
 @app.route('/plot.png')
 def plot_png():
