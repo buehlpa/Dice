@@ -220,9 +220,29 @@ def index():
 
         .video-frame img {
             border-radius: 10px;  /* Optional: for rounded corners on the video */
-        }        
+        }  
         
+        .footer-buttons {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-right: 20px;
+        }
         
+        .reset-button {
+            background-color: #FF5733;
+            color: white;
+            border: none;
+            padding: 12px 24px; /* Increase padding for larger size */
+            border-radius: 8px; /* Increase border-radius for rounded corners */
+            margin-left: 10px;
+            cursor: pointer;
+            font-size: 18px; /* Increase font size */
+        }
+
+        .reset-button:hover {
+            background-color: #E63C0C;
+        } 
     </style>
 </head>
 <body>
@@ -239,17 +259,18 @@ def index():
         <div class="box video-frame">
             <h2>Histogram</h2>
             <img id="histogram" src="/plot.png" alt="Histogram">
-            <button onclick="resetHistogram()">Reset Histogram</button>
         </div>
         
         <div class="box video-frame">
             <h2>Second Histogram</h2>
             <img id="histogram2" src="/plot2.png" alt="Second Histogram">
-            <button onclick="resetSecondHistogram()">Reset Second Histogram</button>
         </div>
     </div>
 
     <div class="footer">
+        <div class="footer-buttons">
+            <button class="reset-button" onclick="resetHistogram()">Neuer Versuch</button>
+        </div>
         <img src="{{ url_for('static', filename='ZHAW_IDP_white.png') }}" alt="IDP-Logo">
     </div>
 
@@ -297,6 +318,7 @@ def index():
     </script>
 </body>
 </html>
+
 """)
 
 
