@@ -53,7 +53,6 @@ def gen_frames():
     # initiate state detector  
     state_detector = StateDetector(calibration_file='configuration/state_calibration.json', max_frames_stack=4,imshape=(480, 640))
     
-
     #for fps calculation
     frame_count = 0
     start_time = time.time()
@@ -93,7 +92,7 @@ def gen_frames():
         
         #TODO SChreibkriterium checken , bis hierhien läuft -> prediciton teil auch
         #if dice_prediction:
-         #   dice_msg= write_result(dice_prediction, filepath='result/results.csv')
+        #   dice_msg= write_result(dice_prediction, filepath='result/results.csv')
         
         # Calculate and display FPS
         frame_count += 1
