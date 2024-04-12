@@ -192,16 +192,16 @@ def predict_dice(frame):
     #if not rerun_criterion(cropped_img_red) or not rerun_criterion(cropped_img_white):
      #   return {} , False    
     
-    resdict={"red_dice":[],"white_dice":[]}
+    resdict={"red":[],"white":[]}
     
     for img in cropped_img_red:
         dice_outcome = predict_one_dice(img)
         pred_class=int(np.argmax(dice_outcome)+1)
-        resdict["red_dice"].append(pred_class)
+        resdict["red"].append(pred_class)
     for img in cropped_img_white:
         dice_outcome=predict_one_dice(img)
         pred_class=int(np.argmax(dice_outcome)+1)
-        resdict["white_dice"].append(pred_class)  
+        resdict["white"].append(pred_class)  
         
     return resdict, True
 

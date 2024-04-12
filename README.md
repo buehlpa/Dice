@@ -57,7 +57,8 @@ Dice/workspace  - train DL models  on machine with gpu
             - develop Algos to detect dices 
                 - greenscreen , eroding, masking etc. 
                 
-                
+# use the 2560 x 1440 screen resolution , other formats are currently not supported
+               
                 
                 
 # Fixing tflite:
