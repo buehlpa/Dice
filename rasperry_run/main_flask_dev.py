@@ -8,7 +8,7 @@ import threading
 from utils.DicePredictorThread import DicePredictorThread
 from utils.state_predictor import StateDetector
 from utils.plotting import write_result, plot_histogram
-from utils.argparser import load_and_parse_args
+#from utils.argparser import load_and_parse_args
 
 
 #flask
@@ -23,16 +23,19 @@ log = logging.getLogger('werkzeug')
 log.disabled = True
 
 
+
 # DEBUG MODE
-DEBUG_MODE=True
+DEBUG_MODE=False
 
 # PATHS
 RESPATH= 'results'
 STATPATH= 'static'
 
 ## on local WIN os
-RESPATH=r'C:\Users\buehl\repos\Dice\rasperry_run\results'
-STATPATH=r'C:\Users\buehl\repos\Dice\rasperry_run\static'
+#RESPATH=r'C:\Users\buehl\repos\Dice\rasperry_run\results'
+#STATPATH=r'C:\Users\buehl\repos\Dice\rasperry_run\static'
+
+
 
 
 # camerastream + models 
@@ -91,8 +94,8 @@ def gen_frames():
         
         
         #TODO SChreibkriterium checken , bis hierhien läuft -> prediciton teil auch
-        #if dice_prediction:
-        #   dice_msg= write_result(dice_prediction, filepath='result/results.csv')
+        if dice_prediction:
+           dice_msg= write_result(dice_prediction, filepath='result/results.csv')
         
         # Calculate and display FPS
         frame_count += 1
@@ -102,11 +105,15 @@ def gen_frames():
             frame_count = 0
             start_time = time.time()
             
+        frame =cv2.Canny(frame,150,200)   
     
         # overlay state, dicecount and  FPS on the frame
-        cv2.putText(frame, state_msg, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_AA)
-        cv2.putText(frame, dice_msg, (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_AA)
-        cv2.putText(frame, f'FPS: {fps:.2f}', (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA) 
+        cv2.putText(frame, state_msg, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+        cv2.putText(frame, dice_msg, (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+        cv2.putText(frame, f'FPS: {fps:.2f}', (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA) 
+        
+        
+        
                 
         #send image to flask app
         _, buffer = cv2.imencode('.jpg', frame)
@@ -126,6 +133,7 @@ def reset_histogram():
     results={"throw":[],"white":[],"red":[]}
     df = pd.DataFrame(results)
     df.to_csv(csv_file, index=False)
+    print("reset")
     return '', 204  # Return no content status
 
 @app.route('/plot.png')
@@ -139,7 +147,7 @@ def plot_png():
 def plot2_png():
     data_path = os.path.join(RESPATH, 'results.csv')  
     column_name = 'white'         
-    img = plot_histogram(data_path, column_name,)
+    img = plot_histogram(data_path, column_name)
     return send_file(img, mimetype='image/png')
 
 
@@ -251,9 +259,29 @@ def index():
 
         .video-frame img {
             border-radius: 10px;  /* Optional: for rounded corners on the video */
-        }        
+        }  
         
+        .footer-buttons {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-right: 20px;
+        }
         
+        .reset-button {
+            background-color: #FF5733;
+            color: white;
+            border: none;
+            padding: 12px 24px; /* Increase padding for larger size */
+            border-radius: 8px; /* Increase border-radius for rounded corners */
+            margin-left: 10px;
+            cursor: pointer;
+            font-size: 18px; /* Increase font size */
+        }
+
+        .reset-button:hover {
+            background-color: #E63C0C;
+        } 
     </style>
 </head>
 <body>
@@ -270,17 +298,18 @@ def index():
         <div class="box video-frame">
             <h2>Histogram</h2>
             <img id="histogram" src="/plot.png" alt="Histogram">
-            <button onclick="resetHistogram()">Reset Histogram</button>
         </div>
         
         <div class="box video-frame">
             <h2>Second Histogram</h2>
             <img id="histogram2" src="/plot2.png" alt="Second Histogram">
-            <button onclick="resetSecondHistogram()">Reset Second Histogram</button>
         </div>
     </div>
 
     <div class="footer">
+        <div class="footer-buttons">
+            <button class="reset-button" onclick="resetHistogram()">Neuer Versuch</button>
+        </div>
         <img src="{{ url_for('static', filename='ZHAW_IDP_white.png') }}" alt="IDP-Logo">
     </div>
 
@@ -328,6 +357,7 @@ def index():
     </script>
 </body>
 </html>
+
 """)
 
 

@@ -12,8 +12,15 @@ from threading import Lock
 matplotlib_lock = Lock()
 
 
+
+# use difeertne patha on local win insatnce
+
 RESPATH=r'C:\Users\buehl\repos\Dice\rasperry_run\results'
 STATPATH=r'C:\Users\buehl\repos\Dice\rasperry_run\static'
+RESPATH= 'results'
+STATPATH= 'static'
+
+
 
 
 def append_to_csv(filepath, new_df):
@@ -25,7 +32,8 @@ def check_empty_dice_results(filepath):
     df = pd.read_csv(filepath)
     if df.empty:
         return True
-    return False
+    else:
+        return False
 
 def create_dataframe_fillNA(data:dict):
     ''' Create a DataFrame from a dictionary and fill missing values with NaN'''
@@ -44,22 +52,27 @@ def dummy_dice_pred():
     
     return dice_dict , True
 
-def write_result(dice_prediction, filepath='result/results.csv'):
+def write_result(dice_prediction, filepath='results/results.csv'):
     dice_dict, dice_pass = dice_prediction
+    
     if not dice_pass:
         dice_msg="Dice: Prediction failed, try again!"
-    
+
     else:
+        print('in else')
         if check_empty_dice_results(filepath):
             throw_number=0
             print("First throw")
+        else:
+            print(dice_dict)
+            df = pd.read_csv(filepath)
+            throw_number=df['throw'].iloc[-1]
+            print(throw_number)
+            
         throw_number += 1
-        
         dice_dict_NA=create_dataframe_fillNA(dice_dict)
         dice_dict_NA['throw'] = [throw_number] * len(dice_dict['white'])
-        
         append_to_csv(filepath, dice_dict_NA)
-        
         dice_msg="Dice: "+str(dice_dict)
         
     return dice_msg 
@@ -79,6 +92,7 @@ def place_image(ax, img_path, xy, zoom=1):
     ab = AnnotationBbox(imagebox, xy, frameon=True, xybox=(10, -15), boxcoords="offset points", pad=0)
     # Add it to the axes
     ax.add_artist(ab)
+
 
 
 # plot histogram
