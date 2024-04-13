@@ -8,10 +8,10 @@ def load_config(filename):
             config = json.load(f)
         return config
     except FileNotFoundError:
-        print(f"Error: Configuration file '{filename}' not found.")
+        print(f"ARGPARSER Error: Configuration file '{filename}' not found.")
         sys.exit(1)
     except json.JSONDecodeError as e:
-        print(f"Error parsing JSON in '{filename}': {e}")
+        print(f"ARGPARSER Error parsing JSON in '{filename}': {e}")
         sys.exit(1)
 
 def parse_args(config):

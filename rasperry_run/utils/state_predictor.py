@@ -4,18 +4,14 @@ import cv2
 import json
 
 class StateDetector:
-    def __init__(self,calibration_file='configuration/state_calibration.json', max_frames_stack=4,imshape=(480,640)):
+    def __init__(self,args):
         
         
-        with open(calibration_file) as f:
-            calibration_dict = json.load(f)
-        self.threshold = calibration_dict['state_threshold']
-        self.moving_treshold = calibration_dict['moving_threshold']
-        
-
+        self.threshold = args.state_threshold
+        self.moving_treshold = args.moving_threshold
         self.state_stack_lock = False
-        self.queue =deque(maxlen=max_frames_stack)
-        self.imshape=imshape
+        self.queue =deque(maxlen=args.max_frames_stack)
+        self.imshape=args.imshape
         self.last_frame = np.zeros(self.imshape)
         
     def get_scene_state(self,frame):

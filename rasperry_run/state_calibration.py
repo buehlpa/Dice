@@ -14,7 +14,7 @@ by running this file yopu can determine the threshold to distingusishc still fro
 
 
 
-def calibrate_state(calibration_file="configuration/state_calibration.json"):
+def calibrate_state(calibration_file="configuration/config.json"):
     print("Calibration process started , wait for camera window to show & follow the instructions there...")
     cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_EXPOSURE, 50)

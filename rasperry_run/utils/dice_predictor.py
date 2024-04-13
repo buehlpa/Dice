@@ -5,7 +5,7 @@ import os
 
 import tflite_runtime.interpreter as tflite
 ##DEBUG
-DEBUG_MODE=True
+DEBUG_MODE=False
 
 # Tensorflow lite model directory
 model_dir = 'models'

@@ -8,7 +8,7 @@ import threading
 from utils.DicePredictorThread import DicePredictorThread
 from utils.state_predictor import StateDetector
 from utils.plotting import write_result, plot_histogram
-#from utils.argparser import load_and_parse_args
+from utils.argparser import load_and_parse_args
 
 
 #flask
@@ -22,27 +22,20 @@ import logging
 log = logging.getLogger('werkzeug')
 log.disabled = True
 
+#load arguments from configuration file
+argpath='configuration/config.json'
+global args 
+args=load_and_parse_args(argpath)
 
 
-# DEBUG MODE
-DEBUG_MODE=False
-
-# PATHS
-RESPATH= 'results'
-STATPATH= 'static'
-
-## on local WIN os
-#RESPATH=r'C:\Users\buehl\repos\Dice\rasperry_run\results'
-#STATPATH=r'C:\Users\buehl\repos\Dice\rasperry_run\static'
-
-
-
+global use_canny
+use_canny=True
 
 # camerastream + models 
 def gen_frames():
     global cap
     cap = cv2.VideoCapture(0)
-    cap.set(cv2.CAP_PROP_EXPOSURE, 50)
+    cap.set(cv2.CAP_PROP_EXPOSURE, args.CAP_PROP_EXPOSURE)
     
     if not cap.isOpened():
         print("Cannot open camera")
@@ -54,7 +47,7 @@ def gen_frames():
     
     # IF you want to calibrate camera run separate calibration script 
     # initiate state detector  
-    state_detector = StateDetector(calibration_file='configuration/state_calibration.json', max_frames_stack=4,imshape=(480, 640))
+    state_detector = StateDetector(args)
     
     #for fps calculation
     frame_count = 0
@@ -62,8 +55,8 @@ def gen_frames():
     fps = 1
     
     # initiate states for overlay on image
-    dice_msg = 'Dice:  '
-    state_msg = 'State: '
+    dice_msg = 'Warte auf Vorhersage ... '
+    state_msg = 'Initialisiere .. Status '
     
     # frame loop 
     while True:
@@ -74,12 +67,12 @@ def gen_frames():
             break
         
         # cut the lowest part of the image
-        frame= frame[:470,:,:]
+        frame= frame[:args.frame_cut_x,:,:]
 
         # run fast state detection 
         grayscaleframe= cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         state , capture=state_detector.get_scene_state(grayscaleframe)
-        state_msg = f'State: {state}'
+        state_msg = f'{args.msg[state]}'
         
         # if state detector returned capture = True, enqueue the frame for dice detection 
         if capture:
@@ -89,13 +82,14 @@ def gen_frames():
         # if dice prediction is available, show it    
         dice_prediction = dice_detector.get_dice_prediction()
         
-        if DEBUG_MODE:
+        if args.DEBUG_MODE:
             print(f'state:{state}',f'capture:{capture}',f'dice_prediction:{dice_prediction}')
         
         
         #TODO SChreibkriterium checken , bis hierhien läuft -> prediciton teil auch
         if dice_prediction:
-           dice_msg= write_result(dice_prediction, filepath='result/results.csv')
+            dice_msg=str(dice_prediction)
+           #dice_msg= write_result(dice_prediction, filepath='result/results.csv')
         
         # Calculate and display FPS
         frame_count += 1
@@ -105,16 +99,15 @@ def gen_frames():
             frame_count = 0
             start_time = time.time()
             
-        frame =cv2.Canny(frame,150,200)   
+        if use_canny:    
+            frame =cv2.Canny(frame,150,200)   
     
         # overlay state, dicecount and  FPS on the frame
         cv2.putText(frame, state_msg, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
-        cv2.putText(frame, dice_msg, (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
         cv2.putText(frame, f'FPS: {fps:.2f}', (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA) 
+        cv2.putText(frame, dice_msg, (10, 450), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
         
         
-        
-                
         #send image to flask app
         _, buffer = cv2.imencode('.jpg', frame)
         displayframe = buffer.tobytes()
@@ -125,11 +118,11 @@ def gen_frames():
 ####### app routing
 app = Flask(__name__)
 
+# Routes
 @app.route('/reset_histogram', methods=['POST'])
 def reset_histogram():
     '''resets results file to an empty csv'''
-    
-    csv_file = os.path.join(RESPATH, 'results.csv')
+    csv_file = os.path.join(args.RESPATH, 'results.csv')
     results={"throw":[],"white":[],"red":[]}
     df = pd.DataFrame(results)
     df.to_csv(csv_file, index=False)
@@ -138,22 +131,21 @@ def reset_histogram():
 
 @app.route('/plot.png')
 def plot_png():
-    data_path = os.path.join(RESPATH, 'results.csv')  
+    data_path = os.path.join(args.RESPATH, 'results.csv')  
     column_name = 'red'      
     img = plot_histogram(data_path, column_name)
     return send_file(img, mimetype='image/png')
 
 @app.route('/plot2.png')
 def plot2_png():
-    data_path = os.path.join(RESPATH, 'results.csv')  
+    data_path = os.path.join(args.RESPATH, 'results.csv')  
     column_name = 'white'         
     img = plot_histogram(data_path, column_name)
     return send_file(img, mimetype='image/png')
 
-
 @app.route('/video_feed')
 def video_feed():
-    return Response(gen_frames(),mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/close_app', methods=['POST'])
 def close_app():
@@ -161,20 +153,21 @@ def close_app():
     try:
         if cap.isOpened():
             cap.release()
-            
         os.kill(os.getpid(), signal.SIGTERM)
         return "Closed Successfully", 200  # Return a success message with a 200 OK status
     except Exception as e:
         return str(e), 500  # Return the error message with a 500 Internal Server Error status if something goes wrong
 
+# Route to toggle use_canny variable
+@app.route('/toggle_canny', methods=['POST'])
+def toggle_canny():
+    global use_canny
+    use_canny = not use_canny
+    if DEBUG_MODE:
+        print("use_canny set to:", use_canny)
+    return '', 204  # Return no content status
 
-
-
-# TODO make UI nicer
-# TODO proper histogramm
-# TODO put flask structure correctly
-# CSS fonts for zhaw helvitca rounded bold 
-
+# Main route
 @app.route('/')
 def index():
     return render_template_string("""<!DOCTYPE html>
@@ -308,7 +301,8 @@ def index():
 
     <div class="footer">
         <div class="footer-buttons">
-            <button class="reset-button" onclick="resetHistogram()">Neuer Versuch</button>
+            <button class="reset-button" onclick="resetHistogram()">Neuen Versuch starten</button>
+            <button class="reset-button" onclick="toggleCanny()">Kamera Filter</button>
         </div>
         <img src="{{ url_for('static', filename='ZHAW_IDP_white.png') }}" alt="IDP-Logo">
     </div>
@@ -340,12 +334,11 @@ def index():
             .catch(error => console.error('Error:', error));
         }
         
-        function resetSecondHistogram() {
-            fetch('/reset_second_histogram', { method: 'POST' })
+        function toggleCanny() {
+            fetch('/toggle_canny', { method: 'POST' })
             .then(response => {
                 if (response.ok) {
-                    console.log("Second Histogram reset successfully.");
-                    refreshSecondImage(); // Refresh the second histogram image
+                    console.log("Canny toggled successfully.");
                 }
             })
             .catch(error => console.error('Error:', error));
