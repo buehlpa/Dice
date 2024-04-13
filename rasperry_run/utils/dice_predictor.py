@@ -9,7 +9,7 @@ DEBUG_MODE=True
 
 # Tensorflow lite model directory
 model_dir = 'models'
-model_file = 'model_single_dices.tflite'
+model_file = 'model_single_dices_100.tflite'
 MODEL_PATH = os.path.join(model_dir, model_file)
 
 # Output classes
