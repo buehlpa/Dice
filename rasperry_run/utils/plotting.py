@@ -9,6 +9,8 @@ from io import BytesIO
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import matplotlib.pyplot as plt
 import matplotlib# lock matqplotlib for multithreading
+from matplotlib.ticker import MaxNLocator
+
 matplotlib.use('Agg') 
 from threading import Lock
 matplotlib_lock = Lock()
@@ -99,50 +101,65 @@ def place_image(ax, img_path, xy, zoom=1):
 
 
 
-# plot histogram
-def plot_histogram(data_path, column_name):
-    
-    '''read data from csv file and plot histogram of the column_name with annotated dices on x-axis'''
-    
-    with matplotlib_lock:
-        plt.ioff()
-        df = pd.read_csv(data_path)
-        rolls=df[column_name].dropna().tolist()
-        # Theoretical distribution for a fair dice (uniform distribution)
-        fair_probs = [1/6] * 6  # Since each outcome (1-6) has an equal probability
-        
-        p_value=0
-        if len(rolls) != 0:
-            # Counting the frequency of each outcome for the unfair dice
-            unfair_probs = [rolls.count(i) / len(rolls) for i in range(1, 7)]
-            observed_frequencies = [rolls.count(i) for i in range(1, 7)]
-            expected_frequencies = [len(rolls) / 6] * 6
-            chi_squared_stat, p_value = chisquare(observed_frequencies, f_exp=expected_frequencies)
-        
-        # Create the plot
-        fig, ax = plt.subplots()
+def place_image(ax, img_path, xy, zoom=1):
+    img = plt.imread(img_path)
+    imagebox = OffsetImage(img, zoom=zoom)
+    ab = AnnotationBbox(imagebox, xy, frameon=True, xybox=(20, -15), boxcoords="offset points", pad=0)
+    ax.add_artist(ab)
 
-        # Plotting the bar charts
-        ax.bar(range(1, 7), fair_probs, alpha=1, color='#0165A8', label='Theoretisch', width=0.4)
+def plot_histogram(data_path, column_names=['white', 'red']):
+    
+    german_dict= {'white':'Weiss - Gewürfelt', 'red':'Rot - Gewürfelt'}
+    with matplotlib_lock:
+        df = pd.read_csv(data_path)
+        fig, ax = plt.subplots(figsize=(12, 6))  # Adjust the figure size here
         
-        if len(rolls) != 0 and column_name == 'red':
-            ax.bar([x + 0.4 for x in range(1, 7)], unfair_probs, alpha=0.8, color='red', label='Gewürfelt', width=0.4)
-        elif len(rolls) != 0 and column_name == 'white':
-            ax.bar([x + 0.4 for x in range(1, 7)], unfair_probs, alpha=0.8, edgecolor='black', color='white', label='Gewürfelt', width=0.4)
+        # Set x-axis to integers only
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        
+        # Plot each column's histogram side by side
+        bar_width = 0.25
+        for i, column_name in enumerate(column_names):
+            rolls = df[column_name].dropna().tolist()
+            if len(rolls) != 0:
+                # Calculate observed frequencies and p-value
+                observed_frequencies = [rolls.count(i) / len(rolls) for i in range(1, 7)]
+                
+                # Plot bar chart for observed frequencies
+                ax.bar([x + i * bar_width for x in range(1, 7)], 
+                       observed_frequencies, 
+                       alpha=0.8, label=german_dict[column_name], width=bar_width,
+                       edgecolor='black',
+                       color='red' if column_name == 'red' else 'white')
+                
+                # Annotate each bar with the actual count for each outcome
+                for x, freq in zip(range(1, 7), observed_frequencies):
+                    ax.text(x + (i * bar_width), freq + 0.0, f'{rolls.count(x)}', ha='center', va='bottom')
+
+        # Plot theoretical probabilities (shared between both columns)
+        theoretical_probs = [1/6] * 6
+        ax.bar([x + len(column_names) * bar_width for x in range(1, 7)], 
+               theoretical_probs, 
+               alpha=0.5, label=f'Theoretisch', width=bar_width,
+               color='blue', hatch='//')
 
         # Remove numerical x-tick labels and place images instead
-        ax.set_xticks(range(1, 7))
+        ax.set_xticks([1 + i * bar_width + len(column_names) * bar_width / 2 for i in range(6)])
         ax.set_xticklabels([])  # Remove x-tick labels
         ax.tick_params(axis='both', which='both', length=0)  # Remove axis ticks
 
         for i in range(1, 7):
             place_image(ax, os.path.join(args.STATPATH, f'side{i}.jpg'), xy=(i, 0), zoom=0.04)
-        plt.title(f'Häufigkeiten von Würfelergebnissen, Anzahl Würfe: {len(rolls)} p= {p_value:.3f}')
-        plt.legend()
-        #plt.xlabel('Würfel Augen', labelpad=30)
+            
+        len_white = len(df['white'].dropna().tolist())
+        len_red = len(df['red'].dropna().tolist())
+        
+        plt.title(f' Anzahl Würfe - Rot: {len_white}, Weiss: {len_red}')
         plt.ylabel('Relative Häufigkeit')
-                
-
+        plt.legend()
+        plt.show()
+        
+        
         img = BytesIO()
         plt.savefig(img, format='png')
         img.seek(0)
