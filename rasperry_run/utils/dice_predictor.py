@@ -4,13 +4,15 @@ import random
 import os
 
 import tflite_runtime.interpreter as tflite
-##DEBUG
-DEBUG_MODE=False
+
+from utils.argparser import load_and_parse_args
+argpath='configuration/config.json'
+global args 
+args=load_and_parse_args(argpath)
+
 
 # Tensorflow lite model directory
-model_dir = 'models'
-model_file = 'model_single_dices_100.tflite'
-MODEL_PATH = os.path.join(model_dir, model_file)
+MODEL_PATH = os.path.join(args.MODELPATH, args.model_file)
 
 # Output classes
 class_labels_dice = ["1", "2", "3", "4", "5", "6"]
@@ -23,7 +25,6 @@ interpreter_dice.allocate_tensors()
 input_details_dice = interpreter_dice.get_input_details()
 output_details_dice = interpreter_dice.get_output_details()
 input_shape_dice = input_details_dice[0]['shape']
-
 
 
 ## Helper functions
@@ -57,9 +58,6 @@ def get_cropped(orig_gray,img):
     cropped = []
     hull_mask = np.zeros_like(binary_mask)
     
-    
-    
-    
     # Loop over each contour
     for contour in contours:
         hull = cv2.convexHull(contour)
@@ -83,12 +81,12 @@ def get_white_red(img):
     hsv_image = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     
     # remove background -> white and red, only take the red ones
-    rgb_nogreen=   remove_range(hsv_image,np.array([40, 0, 0]),np.array([90, 255, 255])) #rbg
-    rgb_red = remove_range(cv2.cvtColor(rgb_nogreen, cv2.COLOR_RGB2HSV), np.array([30, 0, 0]), np.array([160, 255, 255]))
+    rgb_nogreen=   remove_range(hsv_image,np.array(args.hsv_remove_green_lower),np.array(args.hsv_remove_green_upper)) #rbg
+    rgb_red = remove_range(cv2.cvtColor(rgb_nogreen, cv2.COLOR_RGB2HSV), np.array(args.hsv_remove_red_lower), np.array(args.hsv_remove_red_upper))
     
     
-    if DEBUG_MODE:
-        cv2.imwrite('nogreen.jpg', rgb_nogreen)
+    if args.DEBUG_MODE:
+        cv2.imwrite('nogreen_background.jpg', rgb_nogreen)
         
     # get cropped images for red  and the mask of the red die
     cropped_img_red , hull_mask_red =get_cropped(orig_gray,rgb_red)
@@ -173,18 +171,17 @@ def predict_dice(frame):
     img: opencv bgr array 
     returns: number of red and white dices, if criterion met bool
     '''
-    if DEBUG_MODE:
-        cv2.imwrite('put_predict.jpg', frame)
+    if args.DEBUG_MODE:
+        cv2.imwrite('input_to_predict.jpg', frame)
     
     
     cropped_img_red,cropped_img_white = get_white_red(frame)
-    print(f'LENGTH {len(cropped_img_red)} , LENGTH {len(cropped_img_white)}')
     
-    if DEBUG_MODE:
+    if args.DEBUG_MODE:
         for i in range(len(cropped_img_red)):
-            cv2.imwrite(f'cropped_red{i}.jpg', cropped_img_red[i])
+            cv2.imwrite(f'output_cropped_red{i}.jpg', cropped_img_red[i])
         for i in range(len(cropped_img_white)):
-            cv2.imwrite(f'cropped_img_white{i}.jpg', cropped_img_white[i])
+            cv2.imwrite(f'output_cropped_img_white{i}.jpg', cropped_img_white[i])
             
             
     ## TODO         REURN Kriteirum ändern

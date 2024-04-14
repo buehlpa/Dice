@@ -4,7 +4,7 @@
     "MODELPATH": "models",
 "PAGE_PATH":"html",
 "PLOT_PATH":"plot",
-    "model_file": "model_single_dices.tflite",
+    "model_file": "model_single_dices_100.tflite",
     "imshape": [480, 640],
     "state_threshold": 0.6,
     "moving_threshold": 3.0,

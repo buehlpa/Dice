@@ -7,28 +7,14 @@ import threading
 # own utils
 from utils.DicePredictorThread import DicePredictorThread
 from utils.state_predictor import StateDetector
-from utils.plotting import write_result,PlotGenerator, plot_histogram
+from utils.plotting import write_result, plot_histogram
 from utils.argparser import load_and_parse_args
-
 
 #flask
 import os
 from flask import Flask, Response, request, render_template_string, send_file
 import webbrowser
 import signal
-
-#matplot
-from io import BytesIO
-from matplotlib.offsetbox import OffsetImage, AnnotationBbox
-import matplotlib.pyplot as plt
-import matplotlib# lock matqplotlib for multithreading
-matplotlib.use('Agg') 
-from threading import Lock
-#matplotlib_lock = Lock()
-from scipy.stats import chisquare
-
-#plot_gen_white = PlotGenerator(os.path.join(args.RESPATH, 'results.csv') , 'white')
-#plot_gen_red = PlotGenerator(os.path.join(args.RESPATH, 'results.csv') , 'red')
 
 # logger
 import logging
@@ -85,7 +71,7 @@ def gen_frames():
         grayscaleframe= cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         state , capture=state_detector.get_scene_state(grayscaleframe)
         state_msg = f'{args.msg[state]}'
-        capture=True
+        
         # if state detector returned capture = True, enqueue the frame for dice detection 
         if capture:
             frame_resized = cv2.resize(frame, (224, 224))
@@ -141,17 +127,10 @@ def reset_histogram():
 
 @app.route('/plot.png')
 def plot_png():
-    data_path = os.path.join(args.RESPATH, 'results.csv')  
-    column_name = 'red'      
-    img = plot_histogram(data_path, column_name)
+    data_path = os.path.join(args.RESPATH, 'results.csv')     
+    img = plot_histogram(data_path)
     return send_file(img, mimetype='image/png')
 
-#@app.route('/plot2.png')
-#def plot2_png():
-#    data_path = os.path.join(args.RESPATH, 'results.csv')  
-#    column_name = 'white'         
-#    img = plot_histogram(data_path, column_name)
-#    return send_file(img, mimetype='image/png')
 
 @app.route('/video_feed')
 def video_feed():
@@ -185,8 +164,10 @@ def index():
     return render_template_string(page_content)
 
 #automatically open browser
+
+
 def open_browser():
-      webbrowser.open_new('http://127.0.0.1:5000/')
+     webbrowser.open_new('http://127.0.0.1:5000/')
 
 if __name__ == '__main__':
     threading.Timer(0.5, open_browser).start()
