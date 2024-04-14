@@ -3,6 +3,8 @@ import os
 import pandas as pd
 from scipy.stats import chisquare
 
+from utils.argparser import load_and_parse_args
+
 from io import BytesIO
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import matplotlib.pyplot as plt
@@ -13,13 +15,14 @@ matplotlib_lock = Lock()
 
 
 
-# use difeertne patha on local win insatnce
 
-RESPATH=r'C:\Users\buehl\repos\Dice\rasperry_run\results'
-STATPATH=r'C:\Users\buehl\repos\Dice\rasperry_run\static'
-RESPATH= 'results'
-STATPATH= 'static'
+#load arguments from configuration file
+# on windows : r'C:\Users\buehl\repos\Dice\rasperry_run\configuration\config_win.json'
+# lin: 'configuration/config.json'
 
+argpath=r'C:\Users\buehl\repos\Dice\rasperry_run\configuration\config_win.json' #
+global args 
+args=load_and_parse_args(argpath)
 
 
 
@@ -132,11 +135,11 @@ def plot_histogram(data_path, column_name):
         ax.tick_params(axis='both', which='both', length=0)  # Remove axis ticks
 
         for i in range(1, 7):
-            place_image(ax, os.path.join(STATPATH, f'side{i}.jpg'), xy=(i, 0), zoom=0.04)
+            place_image(ax, os.path.join(args.STATPATH, f'side{i}.jpg'), xy=(i, 0), zoom=0.04)
             
         plt.title(f'Häufigkeiten von Würfelergebnissen, Anzahl Würfe: {len(rolls)} p= {p_value:.3f}')
         plt.legend()
-        plt.xlabel('Würfel Augen', labelpad=30)
+        #plt.xlabel('Würfel Augen', labelpad=30)
         plt.ylabel('Relative Häufigkeit')
                 
 

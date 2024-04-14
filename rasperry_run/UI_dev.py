@@ -7,7 +7,6 @@
 
 ####################################
 
-
 #misc
 import time
 import cv2
@@ -33,13 +32,15 @@ log.disabled = True
 # DEBUG MODE
 DEBUG_MODE=True
 
-# PATHS
-RESPATH= 'results'
-STATPATH= 'static'
 
-## on local WIN os
-RESPATH=r'C:\Users\buehl\repos\Dice\rasperry_run\results'
-STATPATH=r'C:\Users\buehl\repos\Dice\rasperry_run\static'
+#load arguments from configuration file
+# on windows : r'C:\Users\buehl\repos\Dice\rasperry_run\configuration\config_win.json'
+# lin: 'configuration/config.json'
+
+argpath=r'C:\Users\buehl\repos\Dice\rasperry_run\configuration\config_win.json' #
+global args 
+args=load_and_parse_args(argpath)
+
 
 
 # camerastream + models 
@@ -83,38 +84,37 @@ def gen_frames():
         yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + displayframe + b'\r\n')
 
 
-
 ####### app routing
 app = Flask(__name__)
 
+# Routes
 @app.route('/reset_histogram', methods=['POST'])
 def reset_histogram():
     '''resets results file to an empty csv'''
-    
-    csv_file = os.path.join(RESPATH, 'results.csv')
+    csv_file = os.path.join(args.RESPATH, 'results.csv')
     results={"throw":[],"white":[],"red":[]}
     df = pd.DataFrame(results)
     df.to_csv(csv_file, index=False)
+    print("reset")
     return '', 204  # Return no content status
 
 @app.route('/plot.png')
 def plot_png():
-    data_path = os.path.join(RESPATH, 'results.csv')  
+    data_path = os.path.join(args.RESPATH, 'results.csv')  
     column_name = 'red'      
     img = plot_histogram(data_path, column_name)
     return send_file(img, mimetype='image/png')
 
 @app.route('/plot2.png')
 def plot2_png():
-    data_path = os.path.join(RESPATH, 'results.csv')  
+    data_path = os.path.join(args.RESPATH, 'results.csv')  
     column_name = 'white'         
-    img = plot_histogram(data_path, column_name,)
+    img = plot_histogram(data_path, column_name)
     return send_file(img, mimetype='image/png')
-
 
 @app.route('/video_feed')
 def video_feed():
-    return Response(gen_frames(),mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/close_app', methods=['POST'])
 def close_app():
@@ -122,206 +122,27 @@ def close_app():
     try:
         if cap.isOpened():
             cap.release()
-            
         os.kill(os.getpid(), signal.SIGTERM)
         return "Closed Successfully", 200  # Return a success message with a 200 OK status
     except Exception as e:
         return str(e), 500  # Return the error message with a 500 Internal Server Error status if something goes wrong
 
+# Route to toggle use_canny variable
+@app.route('/toggle_canny', methods=['POST'])
+def toggle_canny():
+    global use_canny
+    use_canny = not use_canny
+    if DEBUG_MODE:
+        print("use_canny set to:", use_canny)
+    return '', 204  # Return no content status
 
 
-
-# TODO make UI nicer
-# TODO proper histogramm
-# TODO put flask structure correctly
-# CSS fonts for zhaw helvitca rounded bold 
-
+# Main route , load html
 @app.route('/')
 def index():
-    return render_template_string("""<!DOCTYPE html>
-<html>
-<head>
-    <title>Dice Detection System</title>
-    <link rel="icon" href="{{ url_for('static', filename='logo.ico') }}" type="image/x-icon">
-    <style>
-        @font-face {
-            font-family: 'Helvetica Rounded Bold';
-            src: url('helvetica-rounded-bold.woff2') format('woff2'),
-                 url('helvetica-rounded-bold.woff') format('woff');
-            font-weight: bold;
-            font-style: normal;
-        }
-
-        body {
-            font-family: 'Helvetica Rounded Bold', Arial, sans-serif;
-            background-color: white;
-            color: #333;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-
-        .header, .footer {
-            background-color: #0165A8;
-            color: white;
-            padding: 10px;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            z-index: 1000;
-        }
-
-        .header {
-            min-height: 70px;
-        }
-
-        .footer {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            text-align: right;
-        }
-
-        .footer img {
-            max-height: 100px;
-            margin: 5px 10px;
-        }
-
-        .content {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-around;
-            margin: 10px; /* Margin around content */
-            flex-grow: 1;
-            overflow: auto;
-        }
-
-        .box {
-            display: flex;
-            justify-content: center;
-            flex-direction: column;
-            align-items: center;
-            border: 2px solid #0165A8;
-            margin: 10px; /* Margin around each box */
-            text-align: center;
-            flex-grow: 1;
-        }
-        
-        .video-frame {
-            border: 2px solid #0165A8;
-            padding: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-            border-radius: 15px;
-            background-color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .video-frame img {
-            border-radius: 10px;  /* Optional: for rounded corners on the video */
-        }  
-        
-        .footer-buttons {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            margin-right: 20px;
-        }
-        
-        .reset-button {
-            background-color: #FF5733;
-            color: white;
-            border: none;
-            padding: 12px 24px; /* Increase padding for larger size */
-            border-radius: 8px; /* Increase border-radius for rounded corners */
-            margin-left: 10px;
-            cursor: pointer;
-            font-size: 18px; /* Increase font size */
-        }
-
-        .reset-button:hover {
-            background-color: #E63C0C;
-        } 
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>Erkenne den gefälschten Würfel!</h1>
-    </div>
-
-    <div class="content">
-        <div class="box video-frame">
-            <h2>Camera Stream</h2>
-            <img src="/video_feed" alt="Camera Stream">
-        </div>
-        
-        <div class="box video-frame">
-            <h2>Histogram</h2>
-            <img id="histogram" src="/plot.png" alt="Histogram">
-        </div>
-        
-        <div class="box video-frame">
-            <h2>Second Histogram</h2>
-            <img id="histogram2" src="/plot2.png" alt="Second Histogram">
-        </div>
-    </div>
-
-    <div class="footer">
-        <div class="footer-buttons">
-            <button class="reset-button" onclick="resetHistogram()">Neuer Versuch</button>
-        </div>
-        <img src="{{ url_for('static', filename='ZHAW_IDP_white.png') }}" alt="IDP-Logo">
-    </div>
-
-    <script>
-        function refreshImage() {
-            var img = document.getElementById("histogram");
-            var newSrc = "/plot.png?random=" + Math.random();
-            img.src = newSrc;
-        }
-        
-        function refreshSecondImage() {
-            var img = document.getElementById("histogram2");
-            var newSrc = "/plot2.png?random=" + Math.random();
-            img.src = newSrc;
-        }
-        
-        setInterval(refreshImage, 1000); // Refresh every 1000 milliseconds
-        setInterval(refreshSecondImage, 1000); // Refresh every 1000 milliseconds
-
-        function resetHistogram() {
-            fetch('/reset_histogram', { method: 'POST' })
-            .then(response => {
-                if (response.ok) {
-                    console.log("Histogram reset successfully.");
-                    refreshImage(); // Refresh the histogram image
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        }
-        
-        function resetSecondHistogram() {
-            fetch('/reset_second_histogram', { method: 'POST' })
-            .then(response => {
-                if (response.ok) {
-                    console.log("Second Histogram reset successfully.");
-                    refreshSecondImage(); // Refresh the second histogram image
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        }
-
-        window.onbeforeunload = function() {
-            navigator.sendBeacon('/close_app');
-        }
-    </script>
-</body>
-</html>
-
-""")
-
-
+    with open(os.path.join(args.PAGE_PATH,'page.html'), 'r') as file:
+        page_content = file.read()
+    return render_template_string(page_content)
 
 
 #automatically open browser
