@@ -136,6 +136,10 @@
                 <h2>Rot</h2>
                 <img id="histogram" src="/plot.png" alt="Rot">
             </div>
+            <div class="box">
+                <h2>Weiss</h2>
+                <img id="histogram2" src="/plot2.png" alt="Weiss">
+            </div>
         </div>
     </div>
 
@@ -153,8 +157,15 @@
             var newSrc = "/plot.png?random=" + Math.random();
             img.src = newSrc;
         }
-
+        
+        function refreshSecondImage() {
+            var img = document.getElementById("histogram2");
+            var newSrc = "/plot2.png?random=" + Math.random();
+            img.src = newSrc;
+        }
+        
         setInterval(refreshImage, 1000); // Refresh every 1000 milliseconds
+        setInterval(refreshSecondImage, 1001); // Refresh every 1000 milliseconds
 
         function resetHistogram() {
             fetch('/reset_histogram', { method: 'POST' })

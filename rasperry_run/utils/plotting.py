@@ -105,8 +105,8 @@ def plot_histogram(data_path, column_name):
     '''read data from csv file and plot histogram of the column_name with annotated dices on x-axis'''
     
     with matplotlib_lock:
+        plt.ioff()
         df = pd.read_csv(data_path)
-
         rolls=df[column_name].dropna().tolist()
         # Theoretical distribution for a fair dice (uniform distribution)
         fair_probs = [1/6] * 6  # Since each outcome (1-6) has an equal probability
@@ -137,7 +137,6 @@ def plot_histogram(data_path, column_name):
 
         for i in range(1, 7):
             place_image(ax, os.path.join(args.STATPATH, f'side{i}.jpg'), xy=(i, 0), zoom=0.04)
-            
         plt.title(f'Häufigkeiten von Würfelergebnissen, Anzahl Würfe: {len(rolls)} p= {p_value:.3f}')
         plt.legend()
         #plt.xlabel('Würfel Augen', labelpad=30)
