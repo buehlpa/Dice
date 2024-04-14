@@ -7,7 +7,7 @@ import threading
 # own utils
 from utils.DicePredictorThread import DicePredictorThread
 from utils.state_predictor import StateDetector
-from utils.plotting import write_result#, plot_histogram
+from utils.plotting import write_result,PlotGenerator, plot_histogram
 from utils.argparser import load_and_parse_args
 
 
@@ -27,6 +27,8 @@ from threading import Lock
 #matplotlib_lock = Lock()
 from scipy.stats import chisquare
 
+#plot_gen_white = PlotGenerator(os.path.join(args.RESPATH, 'results.csv') , 'white')
+#plot_gen_red = PlotGenerator(os.path.join(args.RESPATH, 'results.csv') , 'red')
 
 # logger
 import logging
@@ -38,71 +40,9 @@ argpath='configuration/config.json'
 global args 
 args=load_and_parse_args(argpath)
 
-
 global use_canny
 use_canny=True
 
-
-#matplotlib_lock = threading.Lock()
-import plotly.graph_objs as go
-import pandas as pd
-import os
-
-class PlotGenerator:
-    def __init__(self, data_path, column_name):
-        self.data_path = data_path
-        self.column_name = column_name
-    
-    def plot_histogram(self):
-        df = pd.read_csv(self.data_path)
-
-        rolls = df[self.column_name].dropna().tolist()
-
-        # Check if rolls list is empty
-        if not rolls:
-            # If rolls list is empty, return None
-            return None
-
-        # Calculate unfair probabilities only if rolls list is not empty
-
-        unfair_probs = [rolls.count(i) / len(rolls) for i in range(1, 7)]
-        
-        # Create the histogram trace for unfair dice rolls
-        histogram_unfair = go.Bar(
-            x=[i + 0.4 for i in range(1, 7)],
-            y=unfair_probs,
-            marker=dict(color='red' if self.column_name == 'red' else 'white'),
-            name='Gewürfelt'
-        )
-
-        # Create the theoretical histogram trace for a fair dice
-        histogram_fair = go.Bar(
-            x=list(range(1, 7)),
-            y=[1/6] * 6,
-            marker=dict(color='#0165A8'),
-            name='Theoretisch'
-        )
-
-        # Create layout for the plot
-        layout = go.Layout(
-            title=f'Häufigkeiten von Würfelergebnissen, Anzahl Würfe: {len(rolls)}',
-            xaxis=dict(title='Würfel Augen'),
-            yaxis=dict(title='Relative Häufigkeit'),
-            barmode='group',
-            legend=dict(orientation="h", x=0.1, y=1.1)
-        )
-
-        # Create figure and add traces
-        fig = go.Figure(data=[histogram_fair, histogram_unfair], layout=layout)
-
-        # Convert figure to HTML representation
-        img = fig.to_image(format="png")
-
-        return img
-
-
-        
-        
 # camerastream + models 
 def gen_frames():
     global cap
@@ -185,9 +125,6 @@ def gen_frames():
         displayframe = buffer.tobytes()
         yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + displayframe + b'\r\n')
 
-plot_gen_white = PlotGenerator(os.path.join(args.RESPATH, 'results.csv') , 'white')
-plot_gen_red = PlotGenerator(os.path.join(args.RESPATH, 'results.csv') , 'red')
-
 ####### app routing
 app = Flask(__name__)
 
@@ -204,14 +141,16 @@ def reset_histogram():
 
 @app.route('/plot.png')
 def plot_png():
-    plot_gen = PlotGenerator(os.path.join(args.RESPATH, 'results.csv'), 'red')
-    img = plot_gen.plot_histogram()
+    data_path = os.path.join(args.RESPATH, 'results.csv')  
+    column_name = 'red'      
+    img = plot_histogram(data_path, column_name)
     return send_file(img, mimetype='image/png')
 
 @app.route('/plot2.png')
 def plot2_png():
-    plot_gen = PlotGenerator(os.path.join(args.RESPATH, 'results.csv'), 'white')
-    img = plot_gen.plot_histogram()
+    data_path = os.path.join(args.RESPATH, 'results.csv')  
+    column_name = 'white'         
+    img = plot_histogram(data_path, column_name)
     return send_file(img, mimetype='image/png')
 
 @app.route('/video_feed')
@@ -234,10 +173,9 @@ def close_app():
 def toggle_canny():
     global use_canny
     use_canny = not use_canny
-    if args.DEBUG_MODE:
+    if DEBUG_MODE:
         print("use_canny set to:", use_canny)
     return '', 204  # Return no content status
-
 
 # Main route , load html
 @app.route('/')
