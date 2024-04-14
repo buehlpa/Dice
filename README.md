@@ -9,7 +9,8 @@ A project to display Computer Vision Machine Learning and Statistics in a playfu
 
 
 ### Current UI
-![image](https://github.com/buehlpa/Dice/assets/64488738/d801b7f3-2cf3-420e-bab1-dad99851a578)
+![image](https://github.com/buehlpa/Dice/assets/64488738/9fb6b6e5-7055-4a65-aefc-ad5d4ef3be44)
+
 
 ## Installation on UNIX
 
