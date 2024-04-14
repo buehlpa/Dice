@@ -85,7 +85,7 @@ def gen_frames():
         grayscaleframe= cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         state , capture=state_detector.get_scene_state(grayscaleframe)
         state_msg = f'{args.msg[state]}'
-        
+        capture=True
         # if state detector returned capture = True, enqueue the frame for dice detection 
         if capture:
             frame_resized = cv2.resize(frame, (224, 224))
@@ -146,12 +146,12 @@ def plot_png():
     img = plot_histogram(data_path, column_name)
     return send_file(img, mimetype='image/png')
 
-@app.route('/plot2.png')
-def plot2_png():
-    data_path = os.path.join(args.RESPATH, 'results.csv')  
-    column_name = 'white'         
-    img = plot_histogram(data_path, column_name)
-    return send_file(img, mimetype='image/png')
+#@app.route('/plot2.png')
+#def plot2_png():
+#    data_path = os.path.join(args.RESPATH, 'results.csv')  
+#    column_name = 'white'         
+#    img = plot_histogram(data_path, column_name)
+#    return send_file(img, mimetype='image/png')
 
 @app.route('/video_feed')
 def video_feed():
@@ -173,7 +173,7 @@ def close_app():
 def toggle_canny():
     global use_canny
     use_canny = not use_canny
-    if DEBUG_MODE:
+    if args.DEBUG_MODE:
         print("use_canny set to:", use_canny)
     return '', 204  # Return no content status
 
