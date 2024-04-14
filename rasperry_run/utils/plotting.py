@@ -20,7 +20,8 @@ matplotlib_lock = Lock()
 # on windows : r'C:\Users\buehl\repos\Dice\rasperry_run\configuration\config_win.json'
 # lin: 'configuration/config.json'
 
-argpath=r'C:\Users\buehl\repos\Dice\rasperry_run\configuration\config_win.json' #
+#argpath=r'C:\Users\buehl\repos\Dice\rasperry_run\configuration\config_win.json' #
+argpath='configuration/config.json'
 global args 
 args=load_and_parse_args(argpath)
 
@@ -105,7 +106,7 @@ def plot_histogram(data_path, column_name):
     
     with matplotlib_lock:
         df = pd.read_csv(data_path)
-    
+
         rolls=df[column_name].dropna().tolist()
         # Theoretical distribution for a fair dice (uniform distribution)
         fair_probs = [1/6] * 6  # Since each outcome (1-6) has an equal probability

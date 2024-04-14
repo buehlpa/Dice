@@ -35,9 +35,9 @@ DEBUG_MODE=True
 
 #load arguments from configuration file
 # on windows : r'C:\Users\buehl\repos\Dice\rasperry_run\configuration\config_win.json'
-# lin: 'configuration/config.json'
+argpath= 'configuration/config.json'
 
-argpath=r'C:\Users\buehl\repos\Dice\rasperry_run\configuration\config_win.json' #
+#argpath=r'C:\Users\buehl\repos\Dice\rasperry_run\configuration\config_win.json' #
 global args 
 args=load_and_parse_args(argpath)
 

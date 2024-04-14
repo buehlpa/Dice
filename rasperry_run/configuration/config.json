@@ -2,6 +2,7 @@
     "RESPATH": "results",
     "STATPATH": "static",
     "MODELPATH": "models",
+"PAGE_PATH":"html",
     "model_file": "model_single_dices.tflite",
     "imshape": [480, 640],
     "state_threshold": 0.6,
