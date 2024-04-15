@@ -8,7 +8,6 @@ import json
 
 
 '''
-
 by running this file yopu can determine the threshold to distingusishc still from empty scene
 '''
 

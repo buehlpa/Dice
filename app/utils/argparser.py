@@ -1,6 +1,14 @@
+"""_summary_
+
+This module provides functions to load a configuration file and parse the arguments from it.
+The configuration file is a JSON file containing key-value pairs of arguments.
+
+"""
+
 import argparse
 import json
 import sys
+
 
 def load_config(filename):
     try:
