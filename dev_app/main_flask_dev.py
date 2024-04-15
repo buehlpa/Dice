@@ -7,7 +7,7 @@ import threading
 # own utils
 from utils.DicePredictorThread import DicePredictorThread
 from utils.state_predictor import StateDetector
-from utils.plotting import write_result, plot_histogram
+from utils.results import write_result, plot_histogram
 from utils.argparser import load_and_parse_args
 
 #flask
@@ -47,14 +47,15 @@ def gen_frames():
     # initiate state detector  
     state_detector = StateDetector(args)
     
-    #for fps calculation
-    frame_count = 0
-    start_time = time.time()
-    fps = 1
+    if args.DEBUG_MODE:
+        #for fps calculation
+        frame_count = 0
+        start_time = time.time()
+        fps = 1
     
     # initiate states for overlay on image
     dice_msg = 'Warte auf Vorhersage ... '
-    state_msg = 'Initialisiere .. Status '
+    state_msg = 'Initialisiere .. Status '    
     
     # frame loop 
     while True:
@@ -79,37 +80,36 @@ def gen_frames():
             
         # if dice prediction is available, show it    
         dice_prediction = dice_detector.get_dice_prediction()
+                
+        
+        if dice_prediction:
+            dice_msg= write_result(dice_prediction, filepath=os.path.join(args.RESPATH,'results.csv'))
         
         if args.DEBUG_MODE:
             print(f'state:{state}',f'capture:{capture}',f'dice_prediction:{dice_prediction}')
-        
-        
-        #TODO SChreibkriterium checken , bis hierhien läuft -> prediciton teil auch
-        if dice_prediction:
-            dice_msg=str(dice_prediction)
-           #dice_msg= write_result(dice_prediction, filepath='result/results.csv')
-        
-        # Calculate and display FPS
-        frame_count += 1
-        elapsed_time = time.time() - start_time
-        if elapsed_time >= 1.0:  # Update FPS every second
-            fps = int(frame_count / elapsed_time)
-            frame_count = 0
-            start_time = time.time()
-            
+            # Calculate and display FPS
+            frame_count += 1
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= 1.0:  # Update FPS every second
+                fps = int(frame_count / elapsed_time)
+                frame_count = 0
+                start_time = time.time()
+                
         if use_canny:    
             frame =cv2.Canny(frame,150,200)   
     
         # overlay state, dicecount and  FPS on the frame
         cv2.putText(frame, state_msg, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
-        cv2.putText(frame, f'FPS: {fps:.2f}', (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA) 
         cv2.putText(frame, dice_msg, (10, 450), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
         
-        
+        if args.DEBUG_MODE:
+            cv2.putText(frame, f'FPS: {fps:.2f}', (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA) 
+            
         #send image to flask app
         _, buffer = cv2.imencode('.jpg', frame)
         displayframe = buffer.tobytes()
         yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + displayframe + b'\r\n')
+
 
 ####### app routing
 app = Flask(__name__)
@@ -164,8 +164,6 @@ def index():
     return render_template_string(page_content)
 
 #automatically open browser
-
-
 def open_browser():
      webbrowser.open_new('http://127.0.0.1:5000/')
 
