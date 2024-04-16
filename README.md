@@ -29,13 +29,6 @@ python -m venv MYENV
 pip install -r requirements_unix.txt
 ```
 
-
-please download the pretrained models from https://www.mydrive.ch/download/452498811-1699782892/models.rar and put the models here:
-```
-Dice/app/models/
-```
-
-
 ## Hints
 Dice/raspberry_run  - this directory contains the code to run on the rasperry PI with limited resources, the core is developed in /workspace 
 
