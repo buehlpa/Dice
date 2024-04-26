@@ -1,8 +1,8 @@
 {
-    "RESPATH": "C:\\Users\\buehl\\repos\\Dice\\rasperry_run\\results",
-    "STATPATH": "C:\\Users\\buehl\\repos\\Dice\\rasperry_run\\static",
-    "MODELPATH": "C:\\Users\\buehl\\repos\\Dice\\rasperry_run\\models",
-    "PAGE_PATH": "C:\\Users\\buehl\\repos\\Dice\\rasperry_run\\html",
+    "RESPATH": "C:\\Users\\buehl\\repos\\Dice\\dev_app\\results",
+    "STATPATH": "C:\\Users\\buehl\\repos\\Dice\\dev_app\\static",
+    "MODELPATH": "C:\\Users\\buehl\\repos\\Dice\\dev_app\\models",
+    "PAGE_PATH": "C:\\Users\\buehl\\repos\\Dice\\dev_app\\html",
     "model_file": "model_single_dices.tflite",
     "imshape": [
         480,

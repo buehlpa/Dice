@@ -73,7 +73,7 @@
         .histogram-box {
             display: flex;
             justify-content: space-around;
-            
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
             align-items: center;
             border: 2px solid #0165A8;
             margin: 10px; /* Margin around each box */
@@ -102,8 +102,7 @@
             margin-right: 20px;
         }
 
-        .reset-button {
-            background-color: #FF5733;
+        .button {
             color: white;
             border: none;
             padding: 12px 24px; /* Increase padding for larger size */
@@ -113,9 +112,22 @@
             font-size: 18px; /* Increase font size */
         }
 
+        /* Specific button styles */
+        .reset-button {
+            background-color: #f71404; /* Default background color */
+        }
+
         .reset-button:hover {
-            background-color: #E63C0C;
-        } 
+            background-color: #ff0000cc; /* Hover background color */
+        }
+
+        .canny-button {
+            background-color: #FF5733; /* Default background color */
+        }
+
+        .canny-button:hover {
+            background-color: #E63C0C; /* Hover background color */
+        }
     </style>
 
     
@@ -141,8 +153,8 @@
 
     <div class="footer">
         <div class="footer-buttons">
-            <button class="reset-button" onclick="resetHistogram()">Neuen Versuch starten</button>
-            <button class="reset-button" onclick="toggleCanny()">Kamera Filter</button>
+            <button class="button reset-button" onclick="resetHistogram()">Neuen Versuch starten</button>
+            <button class="button canny-button" onclick="toggleCanny()">Kamera Filter</button>
         </div>
         <img src="{{ url_for('static', filename='ZHAW_IDP_white.png') }}" alt="IDP-Logo">
     </div>

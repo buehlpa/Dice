@@ -19,8 +19,8 @@ matplotlib_lock = Lock()
 # on windows : r'C:\Users\buehl\repos\Dice\rasperry_run\configuration\config_win.json'
 
 
-#argpath=r'C:\Users\buehl\repos\Dice\rasperry_run\configuration\config_win.json' #
-argpath='configuration/config.json'
+argpath=r'C:\Users\buehl\repos\Dice\dev_app\configuration\config_win.json' #
+#argpath='configuration/config.json'
 global args 
 args=load_and_parse_args(argpath)
 

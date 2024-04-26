@@ -13,7 +13,7 @@ import cv2
 import pandas as pd
 import threading
 
-from utils.plotting import write_result, plot_histogram
+from utils.results import write_result, plot_histogram
 from utils.argparser import load_and_parse_args
 
 
@@ -35,14 +35,15 @@ DEBUG_MODE=True
 
 #load arguments from configuration file
 # on windows : r'C:\Users\buehl\repos\Dice\rasperry_run\configuration\config_win.json'
-argpath= 'configuration/config.json'
+#argpath= 'configuration/config.json'
+argpath= r'C:\Users\buehl\repos\Dice\dev_app\configuration\config_win.json'
 
 #argpath=r'C:\Users\buehl\repos\Dice\rasperry_run\configuration\config_win.json' #
 global args 
 args=load_and_parse_args(argpath)
 
 
-
+print(args)
 # camerastream + models 
 def gen_frames():
     global cap
