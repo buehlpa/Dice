@@ -212,7 +212,7 @@
 
             <label class="toggle">
                 <span class="toggle-label">Automatisch Erfassen</span>
-                <input class="toggle-checkbox" type="checkbox" onclick="toggleCanny()" checked>
+                <input class="toggle-checkbox" type="checkbox" onclick="toggleCapture()" checked>
                 <div class="toggle-switch"></div>
             </label>
 
@@ -250,6 +250,17 @@
             })
             .catch(error => console.error('Error:', error));
         }
+
+        function toggleCapture() {
+            fetch('/toggle_automaticCapture', { method: 'POST' })
+            .then(response => {
+                if (response.ok) {
+                    console.log("AutomaticCapture toggled successfully.");
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
 
         window.onbeforeunload = function() {
             navigator.sendBeacon('/close_app');

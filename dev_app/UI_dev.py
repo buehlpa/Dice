@@ -43,7 +43,10 @@ global args
 args=load_and_parse_args(argpath)
 
 global use_canny
-use_canny = False
+use_canny = True
+
+global capture_automatic
+capture_automatic = True
 
 print(args)
 # camerastream + models 
@@ -139,6 +142,17 @@ def toggle_canny():
     print("use_canny set to:", use_canny)
     if DEBUG_MODE:
         print("use_canny set to:", use_canny)
+    return '', 204  # Return no content status
+
+# Route to toggle use_canny variable
+@app.route('/toggle_automaticCapture', methods=['POST'])
+def toggle_automaticCapture():
+    global capture_automatic
+    capture_automatic = not capture_automatic
+    
+    print("capture_automatic set to:", capture_automatic)
+    if DEBUG_MODE:
+        print("capture_automatic set to:", capture_automatic)
     return '', 204  # Return no content status
 
 
