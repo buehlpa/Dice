@@ -4,9 +4,16 @@
     <title>Dice Detection System</title>
     <link rel="icon" href="{{ url_for('static', filename='logo.ico') }}" type="image/x-icon">
     <style>
+        @font-face {
+            font-family: 'Helvetica Rounded Bold';
+            src: url('helvetica-rounded-bold.woff2') format('woff2'),
+                 url('helvetica-rounded-bold.woff') format('woff');
+            font-weight: bold;
+            font-style: normal;
+        }
 
         body {
-            font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
+            font-family: 'Helvetica Rounded Bold', Arial, sans-serif;
             background-color: white;
             color: #333;
             margin: 0;
@@ -27,7 +34,6 @@
         .header {
             min-height: 70px;
         }
-
 
         .footer {
             display: flex;
@@ -115,67 +121,12 @@
             background-color: #ff0000cc; /* Hover background color */
         }
 
-        /* Toggle styles */
-        .toggle {
-            cursor: pointer;
-            display: inline-block;
-            margin-right: 20px;
-            margin-left: 80px;
-            text-align: center; /* Center text */
+        .canny-button {
+            background-color: #3ab600; /* Default background color */
         }
 
-        .toggle-switch {
-            display: inline-block;
-            background: #ccc;
-            border-radius: 16px;
-            width: 58px;
-            height: 32px;
-            position: relative;
-            vertical-align: middle;
-            transition: background 0.25s;
-        }
-
-        .toggle-switch:before, .toggle-switch:after {
-            content: "";
-        }
-
-        .toggle-switch:before {
-            display: block;
-            background: linear-gradient(to bottom, #fff 0%, #eee 100%);
-            border-radius: 50%;
-            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
-            width: 24px;
-            height: 24px;
-            position: absolute;
-            top: 4px;
-            left: 4px;
-            transition: left 0.25s;
-        }
-
-        .toggle:hover .toggle-switch:before {
-            background: linear-gradient(to bottom, #fff 0%, #fff 100%);
-            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
-        }
-
-        .toggle-checkbox:checked + .toggle-switch {
-            background: #56c080;
-        }
-
-        .toggle-checkbox:checked + .toggle-switch:before {
-            left: 30px;
-        }
-
-        .toggle-checkbox {
-            position: absolute;
-            visibility: hidden;
-        }
-
-        .toggle-label {
-            margin-left: 5px;
-            position: relative;
-            top: -10px; /* Adjust position of text */
-            display: block; /* Make it a block-level element */
-            text-align: center; /* Center the text */
+        .canny-button:hover {
+            background-color: #3ab600e5; /* Hover background color */
         }
     </style>
 
@@ -203,20 +154,7 @@
     <div class="footer">
         <div class="footer-buttons">
             <button class="button reset-button" onclick="resetHistogram()">Neuen Versuch starten</button>
-
-            <label class="toggle">
-                <span class="toggle-label">Kamera Filter</span>
-                <input class="toggle-checkbox" type="checkbox" onclick="toggleCanny()" checked>
-                <div class="toggle-switch"></div>
-            </label>
-
-            <label class="toggle">
-                <span class="toggle-label">Automatisch Erfassen</span>
-                <input class="toggle-checkbox" type="checkbox" onclick="toggleCanny()" checked>
-                <div class="toggle-switch"></div>
-            </label>
-
-
+            <button class="button canny-button" onclick="toggleCanny()">Kamera Filter</button>
         </div>
         <img src="{{ url_for('static', filename='ZHAW_IDP_white.png') }}" alt="IDP-Logo">
     </div>
@@ -238,6 +176,7 @@
                     refreshImage(); // Refresh the histogram image
                 }
             })
+            
             .catch(error => console.error('Error:', error));
         }
         

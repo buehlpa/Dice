@@ -42,6 +42,8 @@ argpath= r'C:\Users\buehl\repos\Dice\dev_app\configuration\config_win.json'
 global args 
 args=load_and_parse_args(argpath)
 
+global use_canny
+use_canny = False
 
 print(args)
 # camerastream + models 
@@ -133,6 +135,8 @@ def close_app():
 def toggle_canny():
     global use_canny
     use_canny = not use_canny
+    
+    print("use_canny set to:", use_canny)
     if DEBUG_MODE:
         print("use_canny set to:", use_canny)
     return '', 204  # Return no content status
