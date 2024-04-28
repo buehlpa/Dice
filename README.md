@@ -5,6 +5,7 @@
 
 A project to display Computer Vision Machine Learning and Statistics in a playful way 
 
+### Current Prototype
 ![image](https://github.com/buehlpa/Dice/assets/64488738/46b51cfd-4974-4864-b354-d0685827d79d)
 
 
