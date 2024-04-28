@@ -3,7 +3,6 @@ Main file to run the flask app.
 The app opens a browser window with the camera stream and the results of the dice prediction.
 """
 
-
 #misc
 import time
 import cv2
@@ -31,11 +30,13 @@ log.disabled = True
 
 argpath='configuration/config.json'
 
-global args, use_canny,capture_automatic
+global args, use_canny,capture_automatic,capture_manually
 
 args=load_and_parse_args(argpath)
 use_canny = True
 capture_automatic = True
+capture_manually=False
+
 
 # camerastream + models 
 def gen_frames():
@@ -75,24 +76,33 @@ def gen_frames():
         
         # cut the lowest part of the image
         frame= frame[:args.frame_cut_x,:,:]
-
+        
         # run fast state detection 
         grayscaleframe= cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         state , capture_state=state_detector.get_scene_state(grayscaleframe)
         state_msg = f'{args.msg[state]}'
         
-        # if state detector returned capture_state = True, enqueue the frame for dice detection 
-        if capture_state:
-            frame_resized = cv2.resize(frame, (224, 224))
-            dice_detector.enqueue_frame_for_dice(frame_resized)
-            
+        # autmatic capture mode
+        if capture_automatic:
+            # if state detector returned capture_state = True, enqueue the frame for dice detection 
+            if capture_state:
+                frame_resized = cv2.resize(frame, (224, 224))
+                dice_detector.enqueue_frame_for_dice(frame_resized)
+                
+        #Manual capture mode
+        else:
+            global capture_manually
+            if capture_manually:
+                frame_resized = cv2.resize(frame, (224, 224))
+                dice_detector.enqueue_frame_for_dice(frame_resized)
+                capture_manually=False
+                
         # if dice prediction is available, show it    
         dice_prediction = dice_detector.get_dice_prediction()
                 
-        
         if dice_prediction:
             dice_msg= write_result(dice_prediction, filepath=os.path.join(args.RESPATH,'results.csv'))
-        
+            
         if args.DEBUG_MODE:
             print(f'state:{state}',f'capture_state:{capture_state}',f'dice_prediction:{dice_prediction}')
             # Calculate and display FPS
@@ -145,7 +155,6 @@ def plot_png():
     img = plot_histogram(data_path)
     return send_file(img, mimetype='image/png')
 
-
 @app.route('/video_feed')
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
@@ -170,12 +179,22 @@ def toggle_canny():
         print("use_canny set to:", use_canny)
     return '', 204  # Return no content status
 
+# Route to toggle toggle_automaticCapture variable
 @app.route('/toggle_automaticCapture', methods=['POST'])
 def toggle_automaticCapture():
     global capture_automatic
     capture_automatic = not capture_automatic
     if args.DEBUG_MODE:
         print("capture_automatic set to:", capture_automatic)
+    return '', 204  # Return no content status
+
+# Route to capture manually 
+@app.route('/capture_manual', methods=['POST'])
+def capture_manual():
+    global capture_manually
+    capture_manually = True
+    if args.DEBUG_MODE:
+        print("capture_manually set to:", capture_manually)
     return '', 204  # Return no content status
 
 # Main route , load html
@@ -187,7 +206,7 @@ def index():
 
 #automatically open browser
 def open_browser():
-     webbrowser.open_new('http://127.0.0.1:5000/')
+    webbrowser.open_new('http://127.0.0.1:5000/')
 
 if __name__ == '__main__':
     threading.Timer(0.5, open_browser).start()

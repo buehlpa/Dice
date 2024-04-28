@@ -240,7 +240,7 @@
     <script>
         function refreshImage() {
             var img = document.getElementById("histogram");
-            var newSrc = "/plot.png?random=" + Math.random();
+            var newSrc = "/plot.png?random=" + Math.random();a
             img.src = newSrc;
         }
 
@@ -287,6 +287,19 @@
             })
             .catch(error => console.error('Error:', error));
         }
+
+        function handleSpaceKeyPress(event) {
+            if (event.keyCode === 32) {
+                fetch('/capture_manual', { method: 'POST' })
+                .then(response => {
+                    if (response.ok) {
+                        console.log("captured manually successfully.");
+                    }
+                })
+            }
+        }
+        window.addEventListener('keydown', handleSpaceKeyPress);
+
 
         window.onbeforeunload = function() {
             navigator.sendBeacon('/close_app');
