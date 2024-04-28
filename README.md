@@ -5,12 +5,16 @@
 
 A project to display Computer Vision Machine Learning and Statistics in a playful way 
 
+### Current Prototype
 ![image](https://github.com/buehlpa/Dice/assets/64488738/46b51cfd-4974-4864-b354-d0685827d79d)
 
 
 ### Current UI
 ![image](https://github.com/buehlpa/Dice/assets/64488738/9fb6b6e5-7055-4a65-aefc-ad5d4ef3be44)
 
+### Poster
+
+![image](https://github.com/buehlpa/Dice/assets/64488738/65bcf43e-40bd-4e6f-898c-62354c127ece)
 
 ## Installation on UNIX
 
