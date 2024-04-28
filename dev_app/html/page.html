@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>Dice Detection System</title>
     <link rel="icon" href="{{ url_for('static', filename='logo.ico') }}" type="image/x-icon">
     <style>
@@ -115,6 +116,18 @@
             background-color: #ff0000cc; /* Hover background color */
         }
 
+        .resetLastLine-button {
+            background-color: #f75104; /* Default background color */
+        }
+
+        .resetLastLine-button:hover {
+            background-color: #f75104d2; /* Hover background color */
+        }
+
+
+
+
+
         /* Toggle styles */
         .toggle {
             cursor: pointer;
@@ -181,9 +194,11 @@
 
     
 </head>
+
 <body>
     <div class="header">
-        <h1>Erkenne den gefälschten Würfel!</h1>
+
+        <h1>Erkenne den gef&aumllschten W&uumlrfel!</h1>
     </div>
 
     <div class="content">
@@ -203,6 +218,7 @@
     <div class="footer">
         <div class="footer-buttons">
             <button class="button reset-button" onclick="resetHistogram()">Neuen Versuch starten</button>
+            <button class="button resetLastLine-button" onclick="resetLastLine()">Letzten Eintrag l&oumlschen</button>
 
             <label class="toggle">
                 <span class="toggle-label">Kamera Filter</span>
@@ -211,7 +227,7 @@
             </label>
 
             <label class="toggle">
-                <span class="toggle-label">Automatisch Erfassen</span>
+                <span class="toggle-label">W&uumlrfel automatisch erfassen</span>
                 <input class="toggle-checkbox" type="checkbox" onclick="toggleCapture()" checked>
                 <div class="toggle-switch"></div>
             </label>
@@ -240,7 +256,18 @@
             })
             .catch(error => console.error('Error:', error));
         }
-        
+
+        function resetLastLine() {
+            fetch('/reset_last_line', { method: 'POST' })
+            .then(response => {
+                if (response.ok) {
+                    console.log("last Line reset successfully.");
+                    refreshImage(); // Refresh the histogram image
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
         function toggleCanny() {
             fetch('/toggle_canny', { method: 'POST' })
             .then(response => {
@@ -260,7 +287,6 @@
             })
             .catch(error => console.error('Error:', error));
         }
-
 
         window.onbeforeunload = function() {
             navigator.sendBeacon('/close_app');

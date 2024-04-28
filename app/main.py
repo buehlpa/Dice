@@ -13,7 +13,7 @@ import threading
 # own utils
 from utils.DicePredictorThread import DicePredictorThread
 from utils.state_predictor import StateDetector
-from utils.results import write_result, plot_histogram
+from utils.results import write_result, plot_histogram, reset_last_line
 from utils.argparser import load_and_parse_args
 
 #flask
@@ -28,12 +28,14 @@ log = logging.getLogger('werkzeug')
 log.disabled = True
 
 #load arguments from configuration file
-argpath='configuration/config.json'
-global args 
-args=load_and_parse_args(argpath)
 
-global use_canny
-use_canny=True
+argpath='configuration/config.json'
+
+global args, use_canny,capture_automatic
+
+args=load_and_parse_args(argpath)
+use_canny = True
+capture_automatic = True
 
 # camerastream + models 
 def gen_frames():
@@ -76,11 +78,11 @@ def gen_frames():
 
         # run fast state detection 
         grayscaleframe= cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        state , capture=state_detector.get_scene_state(grayscaleframe)
+        state , capture_state=state_detector.get_scene_state(grayscaleframe)
         state_msg = f'{args.msg[state]}'
         
-        # if state detector returned capture = True, enqueue the frame for dice detection 
-        if capture:
+        # if state detector returned capture_state = True, enqueue the frame for dice detection 
+        if capture_state:
             frame_resized = cv2.resize(frame, (224, 224))
             dice_detector.enqueue_frame_for_dice(frame_resized)
             
@@ -92,7 +94,7 @@ def gen_frames():
             dice_msg= write_result(dice_prediction, filepath=os.path.join(args.RESPATH,'results.csv'))
         
         if args.DEBUG_MODE:
-            print(f'state:{state}',f'capture:{capture}',f'dice_prediction:{dice_prediction}')
+            print(f'state:{state}',f'capture_state:{capture_state}',f'dice_prediction:{dice_prediction}')
             # Calculate and display FPS
             frame_count += 1
             elapsed_time = time.time() - start_time
@@ -131,6 +133,12 @@ def reset_histogram():
     print("reset")
     return '', 204  # Return no content status
 
+@app.route('/reset_last_line', methods=['POST'])
+def reset_last_line_route():
+    csv_file = os.path.join(args.RESPATH, 'results.csv')
+    reset_last_line(csv_file)
+    return '', 204
+
 @app.route('/plot.png')
 def plot_png():
     data_path = os.path.join(args.RESPATH, 'results.csv')     
@@ -160,6 +168,14 @@ def toggle_canny():
     use_canny = not use_canny
     if args.DEBUG_MODE:
         print("use_canny set to:", use_canny)
+    return '', 204  # Return no content status
+
+@app.route('/toggle_automaticCapture', methods=['POST'])
+def toggle_automaticCapture():
+    global capture_automatic
+    capture_automatic = not capture_automatic
+    if args.DEBUG_MODE:
+        print("capture_automatic set to:", capture_automatic)
     return '', 204  # Return no content status
 
 # Main route , load html

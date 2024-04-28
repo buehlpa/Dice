@@ -89,6 +89,12 @@ def convert_output(dice_dict):
     return output.strip(", ")
 
 
+def reset_last_line(csv_file):
+    """read csv and remove last line and write again to csv file"""
+    with open(csv_file, 'r') as file:
+        lines = file.readlines()[:-1]
+    with open(csv_file, 'w') as file:
+        file.writelines(lines)
 
 ##### Histograms
 
