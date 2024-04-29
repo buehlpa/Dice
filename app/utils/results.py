@@ -291,7 +291,7 @@ def plot_binomial_test(sample_size, observed, color='white', p_alt=2.5/6, alpha=
 def plot_histogram_and_binomial_tests(data_path):
     
     with matplotlib_lock:
-        fig = plt.figure(figsize=(20, 8))  # Adjust the figure size here
+        fig = plt.figure(figsize=(16, 6))  # Adjust the figure size here
         gs = gridspec.GridSpec(2, 2, width_ratios=[1.5, 1], height_ratios=[1, 1])  # Custom grid layout
         
         #count 6es and 3s
