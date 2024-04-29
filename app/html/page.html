@@ -236,11 +236,11 @@
     <script>
         function refreshImage() {
             var img = document.getElementById("histogram");
-            var newSrc = "/plot.png?random=" + Math.random();a
+            var newSrc = "/plot.png?random=" + Math.random();
             img.src = newSrc;
         }
 
-        setInterval(refreshImage, 1000); // Refresh every 1000 milliseconds
+        setInterval(refreshImage, 1000); // Refresh every 1000 milliseconds, TODO: lower will block, higher will be slow 
 
         function resetHistogram() {
             fetch('/reset_histogram', { method: 'POST' })
