@@ -12,7 +12,7 @@ import threading
 # own utils
 from utils.DicePredictorThread import DicePredictorThread
 from utils.state_predictor import StateDetector
-from utils.results import write_result, plot_histogram, reset_last_line
+from utils.results import write_result, plot_histogram, reset_last_line, plot_histogram_and_binomial_tests
 from utils.argparser import load_and_parse_args
 
 #flask
@@ -152,7 +152,8 @@ def reset_last_line_route():
 @app.route('/plot.png')
 def plot_png():
     data_path = os.path.join(args.RESPATH, 'results.csv')     
-    img = plot_histogram(data_path)
+    #img = plot_histogram(data_path)# original
+    img=plot_histogram_and_binomial_tests(data_path)# new with binomial tests
     return send_file(img, mimetype='image/png')
 
 @app.route('/video_feed')
