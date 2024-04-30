@@ -43,8 +43,12 @@ If the still state is detected, a single frame is taken and is ready for isolati
 with the ConnectedComponents algorithm as well as the Bounding Rectangle, the isolation is swift. the output of these chained operations are grayscale, nearly quadratic cropped images of the individual dice in the image
 
 #### CNN
-There is a small CNN with just 3 layers, an increasing amount of filters, Dropout, and ReLu activation functions with a classification Head at the end and CrossEntropy loss. The network is trained with an augmentation strategy on images like these
+There is a small CNN with just 3 layers, an increasing amount of filters, Dropout, and ReLu activation functions with a classification Head at the end and CrossEntropy loss. The network is trained with an augmentation strategy on images like these:
+
+
 <img src="https://github.com/buehlpa/Dice/assets/64488738/c6e68c11-3828-4188-b71b-95074504c4f8" width="600">
+
+
 The dataset to train the model is combined from the object detection dataset https://github.com/nell-byler/dice_detection (just cut the dice according to the box coordinates) and own images taken from the dice detector Box.
 On a testset with 10 samples each (confusion matrix on the left Accuracy=100%), the outcome distribution (right )indicates that the classes were well-learned by the model.
 
