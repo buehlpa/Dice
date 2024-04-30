@@ -53,6 +53,8 @@ The dataset to train the model is combined from the object detection dataset htt
 On a testset with 10 samples each (confusion matrix on the left Accuracy=100%), the outcome distribution (right )indicates that the classes were well-learned by the model.
 
 <img src="https://github.com/buehlpa/Dice/assets/64488738/8f528b2b-d547-4cff-8721-49673aa087c5" width="600">
+
+
 Of course, the whole part with traditional CV and the CNN could be replaced by just an object detection pipeline... 
 
 
