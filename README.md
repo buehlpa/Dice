@@ -11,11 +11,10 @@ A project to display Computer-Vision Machine-Learning and Statistics in a playfu
 
 
 ### Current UI
-
 <img src="https://github.com/buehlpa/Dice/assets/64488738/9fb6b6e5-7055-4a65-aefc-ad5d4ef3be44" width="400">
-### Poster
 
-![image](https://github.com/buehlpa/Dice/assets/64488738/65bcf43e-40bd-4e6f-898c-62354c127ece)
+### Poster
+<img src="https://github.com/buehlpa/Dice/assets/64488738/65bcf43e-40bd-4e6f-898c-62354c127ece" width="400">
 
 ### Working Principle
 
@@ -45,11 +44,11 @@ with the ConnectedComponents algorithm as well as the Bounding Rectangle, the is
 
 #### CNN
 There is a small CNN with just 3 layers, an increasing amount of filters, Dropout, and ReLu activation functions with a classification Head at the end and CrossEntropy loss. The network is trained with an augmentation strategy on images like these
-![image](https://github.com/buehlpa/Dice/assets/64488738/c6e68c11-3828-4188-b71b-95074504c4f8)
+<img src="https://github.com/buehlpa/Dice/assets/64488738/c6e68c11-3828-4188-b71b-95074504c4f8" width="400">
 The dataset to train the model is combined from the object detection dataset https://github.com/nell-byler/dice_detection (just cut the dice according to the box coordinates) and own images taken from the dice detector Box.
 On a testset with 10 samples each (confusion matrix on the left Accuracy=100%), the outcome distribution (right )indicates that the classes were well-learned by the model.
-![image](https://github.com/buehlpa/Dice/assets/64488738/8f528b2b-d547-4cff-8721-49673aa087c5)
 
+<img src="https://github.com/buehlpa/Dice/assets/64488738/8f528b2b-d547-4cff-8721-49673aa087c5" width="400">
 Of course, the whole part with traditional CV and the CNN could be replaced by just an object detection pipeline... 
 
 
@@ -59,7 +58,8 @@ Therefore we can formulate the Null hypothesis that if a die is not fake the tru
 To confidently say that this dice is biased towards our suspected numbers we can not solely rely on the p-value of said test. We have to consider the statistical power (The likelihood of not rejecting the Null hypothesis if the alternative is true, or the Probability of making an error of type 2 https://www.statisticshowto.com/probability-and-statistics/statistics-definitions/statistical-power/).
 For a more precise power analysis, we'd also need the real probability of the fake die, which we could empirically get by rolling the dice several hundred times. Not that the power of this test is reliant on the true probability of the alternative and also the sample size 
 
-![image](https://github.com/buehlpa/Dice/assets/64488738/ff6f8fbe-b07a-4b51-8ae5-6535a90aa594)
+<img src="https://github.com/buehlpa/Dice/assets/64488738/ff6f8fbe-b07a-4b51-8ae5-6535a90aa594" width="400">
+
 
 
 ## Installation on UNIX
