@@ -13,7 +13,7 @@ import cv2
 import pandas as pd
 import threading
 
-from utils.plotting import write_result, plot_histogram
+from utils.results import write_result, plot_histogram
 from utils.argparser import load_and_parse_args
 
 
@@ -35,14 +35,22 @@ DEBUG_MODE=True
 
 #load arguments from configuration file
 # on windows : r'C:\Users\buehl\repos\Dice\rasperry_run\configuration\config_win.json'
-argpath= 'configuration/config.json'
+#argpath= 'configuration/config.json'
+argpath= r'C:\Users\buehl\repos\Dice\dev_app\configuration\config_win.json'
 
 #argpath=r'C:\Users\buehl\repos\Dice\rasperry_run\configuration\config_win.json' #
-global args 
+
+global args
+global use_canny
+global capture_automatic
+global capture_manually
+
 args=load_and_parse_args(argpath)
+use_canny = True
+capture_automatic = True
+capture_manually=False
 
-
-
+print(args)
 # camerastream + models 
 def gen_frames():
     global cap
@@ -65,7 +73,7 @@ def gen_frames():
             print("Can't receive frame (stream end?). Exiting ...")
             cap.release()
             break
-        
+
         # cut the lowest part of the image
         frame= frame[:470,:,:]
 
@@ -75,6 +83,13 @@ def gen_frames():
             fps = int(frame_count / elapsed_time)
             frame_count = 0
             start_time = time.time()
+        
+        global capture_manually
+        if capture_manually:
+            frame= frame[300:470,:,:]
+            
+            capture_manually=False
+            
             
         cv2.putText(frame, f'FPS: {fps:.2f}', (10, 110), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA) 
                 
@@ -132,9 +147,33 @@ def close_app():
 def toggle_canny():
     global use_canny
     use_canny = not use_canny
+    
     if DEBUG_MODE:
         print("use_canny set to:", use_canny)
     return '', 204  # Return no content status
+
+# Route to toggle uautomatic capturing
+@app.route('/toggle_automaticCapture', methods=['POST'])
+def toggle_automaticCapture():
+    global capture_automatic
+    capture_automatic = not capture_automatic
+    
+    if DEBUG_MODE:
+        print("capture_automatic set to:", capture_automatic)
+    return '', 204  # Return no content status
+
+
+
+# Route to capture manually 
+@app.route('/capture_manual', methods=['POST'])
+def capture_manual():
+    global capture_manually
+    capture_manually = True
+    if DEBUG_MODE:
+        print("capture_manually set to:", capture_manually)
+    return '', 204  # Return no content status
+
+
 
 
 # Main route , load html
