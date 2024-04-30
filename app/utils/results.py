@@ -287,6 +287,45 @@ def plot_binomial_test(sample_size, observed, color='white', p_alt=2.5/6, alpha=
              bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=1'),
              fontsize=12, color=text_color, ha='center', va='center')
 
+def plot_binomial_test_only_text(sample_size, observed, color='white', p_alt=2.5/6, alpha=0.05, ax=None):
+    # Define parameters
+    p_true = 1/6   # Probability of success for the null hypothesis
+
+    # Calculate critical value for significance level
+    critical_value = binom.ppf(1 - alpha, sample_size, p_true)
+
+    # Calculate power of the test
+    power = 1 - binom.cdf(observed - 1, sample_size, p_alt)
+
+    # Calculate p-value for the observed value under the real distribution
+    p_value_observed = 1 - binom.cdf(observed - 1, sample_size, p_true)
+
+    if color == 'red':
+        test_type = 'Binomial Test Rot Nr. 3'
+    else:
+        test_type = 'Binomial Test Weiss Nr. 6'
+
+    # Set title and axes labels
+    if ax is not None:
+        if color == 'red':
+            ax.set_title(f'Binomial Test für  Rot Nr. 3\n')
+        else:
+            ax.set_title(f'Binomial Test für  Weiss Nr. 6\n')
+
+        # Add text box in front of the plot
+        text = f'Power: {power:.2f}\n'
+        text += f'P-value: {p_value_observed:.2f}\n\n'
+        if p_value_observed < alpha:
+            text += "Würfel ist vermutlich gezinkt!"
+            text_color = 'red'
+        else:
+            text += "Kein Beweis für einen gefälschten Würfel!"
+            text_color = 'green'
+
+        ax.text(0.5, 0.8, text, transform=ax.transAxes,
+                bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=1'),
+                fontsize=12, color=text_color, ha='center', va='center')
+
 
 def plot_histogram_and_binomial_tests(data_path):
     
@@ -311,12 +350,17 @@ def plot_histogram_and_binomial_tests(data_path):
         # TODO : change the real probas
         
         if white_6 > 0:
-            plot_binomial_test(sample_size=len(white_list), observed=white_6, color='white', p_alt=2.5/6, alpha=0.05, ax=ax_white_test)
+            #plot_binomial_test(sample_size=len(white_list), observed=white_6, color='white', p_alt=2.5/6, alpha=0.05, ax=ax_white_test) # uncomment this and comment below for full plots
+            
+            ax_white_test.axis('off')
+            plot_binomial_test_only_text(sample_size=len(white_list), observed=white_6, color='white', p_alt=2.5/6, alpha=0.05, ax=ax_white_test)
         else:
             ax_white_test.axis('off')
         
         if red_3 > 0:
-            plot_binomial_test(sample_size=len(red_list), observed=red_3, color='red', p_alt=2.5/6, alpha=0.05, ax=ax_red_test)
+            #plot_binomial_test(sample_size=len(red_list), observed=red_3, color='red', p_alt=2.5/6, alpha=0.05, ax=ax_red_test) # uncomment this and comment below for full plots
+            ax_red_test.axis('off')
+            plot_binomial_test_only_text(sample_size=len(red_list), observed=red_3, color='red', p_alt=2.5/6, alpha=0.05, ax=ax_red_test)
         else:
             ax_red_test.axis('off')
                     
