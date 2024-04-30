@@ -1,9 +1,9 @@
-# Automatically Detect Dices 
+# Distinguish Real from Fake dice
 
- Dice detector BOX, from Zurich University of Applied Sciences (ZHAW).
+ Dice-Distinguisher-Box, from Zurich University of Applied Sciences (ZHAW).
  **In development!**
 
-A project to display Computer Vision Machine Learning and Statistics in a playful way 
+A project to display Computer-Vision Machine-Learning and Statistics in a playful way. 
 
 
 ### Current Prototype
