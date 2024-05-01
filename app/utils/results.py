@@ -350,17 +350,17 @@ def plot_histogram_and_binomial_tests(data_path):
         # TODO : change the real probas
         
         if white_6 > 0:
-            #plot_binomial_test(sample_size=len(white_list), observed=white_6, color='white', p_alt=2.5/6, alpha=0.05, ax=ax_white_test) # uncomment this and comment below for full plots
+            plot_binomial_test(sample_size=len(white_list), observed=white_6, color='white', p_alt=2.5/6, alpha=0.05, ax=ax_white_test) # uncomment this and comment below for full plots
             
-            ax_white_test.axis('off')
-            plot_binomial_test_only_text(sample_size=len(white_list), observed=white_6, color='white', p_alt=2.5/6, alpha=0.05, ax=ax_white_test)
+            # ax_white_test.axis('off')
+            # plot_binomial_test_only_text(sample_size=len(white_list), observed=white_6, color='white', p_alt=2.5/6, alpha=0.05, ax=ax_white_test)
         else:
             ax_white_test.axis('off')
         
         if red_3 > 0:
-            #plot_binomial_test(sample_size=len(red_list), observed=red_3, color='red', p_alt=2.5/6, alpha=0.05, ax=ax_red_test) # uncomment this and comment below for full plots
-            ax_red_test.axis('off')
-            plot_binomial_test_only_text(sample_size=len(red_list), observed=red_3, color='red', p_alt=2.5/6, alpha=0.05, ax=ax_red_test)
+            plot_binomial_test(sample_size=len(red_list), observed=red_3, color='red', p_alt=2.5/6, alpha=0.05, ax=ax_red_test) # uncomment this and comment below for full plots
+            # ax_red_test.axis('off')
+            # plot_binomial_test_only_text(sample_size=len(red_list), observed=red_3, color='red', p_alt=2.5/6, alpha=0.05, ax=ax_red_test)
         else:
             ax_red_test.axis('off')
                     

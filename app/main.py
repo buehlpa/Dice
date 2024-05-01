@@ -153,9 +153,9 @@ def reset_last_line_route():
 
 @app.route('/check_variable')
 def check_variable():
-    global new_img
-    if new_img:
-        new_img = False  # Reset the variable after checking
+    global newImg
+    if newImg:
+        newImg = False  # Reset the variable after checking
         return jsonify({'status': True}), 200
     else:
         return jsonify({'status': False}), 200
