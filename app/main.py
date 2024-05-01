@@ -17,7 +17,7 @@ from utils.argparser import load_and_parse_args
 
 #flask
 import os
-from flask import Flask, Response, request, render_template_string, send_file
+from flask import Flask, Response, request, render_template_string, send_file, jsonify
 import webbrowser
 import signal
 
@@ -153,12 +153,12 @@ def reset_last_line_route():
 
 @app.route('/check_variable')
 def check_variable():
-    global newImg
-    if newImg:
-        newImg=False
-        return 'True', 200
+    global new_img
+    if new_img:
+        new_img = False  # Reset the variable after checking
+        return jsonify({'status': True}), 200
     else:
-        return 'False', 200
+        return jsonify({'status': False}), 200
     
 @app.route('/plot.png')
 def plot_png():
