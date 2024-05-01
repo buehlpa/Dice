@@ -30,13 +30,13 @@ log.disabled = True
 
 argpath='configuration/config.json'
 
-global args, use_canny,capture_automatic,capture_manually
+global args, use_canny,capture_automatic,capture_manually,newImg
 
 args=load_and_parse_args(argpath)
 use_canny = True
 capture_automatic = True
 capture_manually=False
-
+newImg=True
 
 # camerastream + models 
 def gen_frames():
@@ -102,6 +102,8 @@ def gen_frames():
                 
         if dice_prediction:
             dice_msg= write_result(dice_prediction, filepath=os.path.join(args.RESPATH,'results.csv'))
+            global newImg
+            newImg=True
             
         if args.DEBUG_MODE:
             print(f'state:{state}',f'capture_state:{capture_state}',f'dice_prediction:{dice_prediction}')
@@ -149,6 +151,15 @@ def reset_last_line_route():
     reset_last_line(csv_file)
     return '', 204
 
+@app.route('/check_variable')
+def check_variable():
+    global newImg
+    if newImg:
+        newImg=False
+        return 'True', 200
+    else:
+        return 'False', 200
+    
 @app.route('/plot.png')
 def plot_png():
     data_path = os.path.join(args.RESPATH, 'results.csv')     

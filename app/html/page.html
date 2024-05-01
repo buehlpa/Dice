@@ -240,7 +240,21 @@
             img.src = newSrc;
         }
 
-        setInterval(refreshImage, 1000); // Refresh every 1000 milliseconds, TODO: lower will block, higher will be slow 
+        function checkVariable() {
+            fetch('/check_variable')
+                .then(response => response.json())
+                .then(data => {
+                    if (data) {
+                        refreshImage()
+                    } 
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        setInterval(checkVariable, 50);
+
+
+        //setInterval(refreshImage, 1000); // Refresh every 1000 milliseconds, TODO: lower will block, higher will be slow 
 
         function resetHistogram() {
             fetch('/reset_histogram', { method: 'POST' })
