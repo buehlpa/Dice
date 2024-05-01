@@ -266,8 +266,8 @@ def plot_binomial_test(sample_size, observed, color='white', p_alt=2.5/6, alpha=
     ax.set_ylabel('Relative Häufigkeit')
     
     # Set integer ticks for x-axis
-    ax.set_xticks(np.arange(0, sample_size+1, step=1))
-    ax.tick_params(axis='x')
+    # ax.set_xticks(np.arange(0, sample_size+1, step=1))
+    # ax.tick_params(axis='x')
 
     # Customize the frame
     ax.spines['top'].set_visible(False)
