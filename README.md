@@ -11,7 +11,7 @@ A project to display Computer-Vision Machine-Learning and Statistics in a playfu
 
 
 ### Current UI
-<img src="https://github.com/buehlpa/Dice/assets/64488738/9fb6b6e5-7055-4a65-aefc-ad5d4ef3be44" width="600">
+<img src="https://github.com/buehlpa/Dice/assets/64488738/96d37a57-1f6c-4824-8ed6-64af55c19e70" width="600">
 
 ### Poster
 <img src="https://github.com/buehlpa/Dice/assets/64488738/65bcf43e-40bd-4e6f-898c-62354c127ece" width="600">
