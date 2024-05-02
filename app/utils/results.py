@@ -1,7 +1,7 @@
 import random
 import os
 import pandas as pd
-from scipy.stats import chisquare,binom
+from scipy.stats import binom # ,chisquare
 import numpy as np
 
 
@@ -25,7 +25,6 @@ matplotlib_lock = Lock()
 
 #argpath=r'C:\Users\buehl\repos\Dice\rasperry_run\configuration\config_win.json' #
 argpath='configuration/config.json'
-global args 
 args=load_and_parse_args(argpath)
 
 #################### IO utils for resultsfile:
@@ -97,9 +96,9 @@ def convert_output(dice_dict):
 def reset_last_line(filepath):
     """read csv and remove last line and write again to csv file"""
     if not check_empty_dice_results(filepath):
-        with open(filepath, 'r') as file:
+        with open(filepath, 'r',encoding="utf-8") as file:
             lines = file.readlines()[:-1]
-        with open(filepath, 'w') as file:
+        with open(filepath, 'w', encoding="utf-8") as file:
             file.writelines(lines)
 
 ####################################################### PLOTS 
@@ -112,13 +111,16 @@ def place_image(ax, img_path, xy, zoom=1):
     ax.add_artist(ab)
 
 
-def plot_histogram(data_path, column_names=['white', 'red']):
+def plot_histogram(data_path, column_names=None):
     '''basic histogram plot for the dice rolls'''
+    
+    if column_names == None:
+        column_names = ['white', 'red']
     
     german_dict= {'white':'Weiss - Gewürfelt', 'red':'Rot - Gewürfelt'}
     with matplotlib_lock:
         df = pd.read_csv(data_path)
-        fig, ax = plt.subplots(figsize=(12, 6))  # Adjust the figure size here
+        _, ax = plt.subplots(figsize=(12, 6))  # Adjust the figure size here
         
         # Set x-axis to integers only
         ax.xaxis.set_major_locator(MaxNLocator(integer=True))
@@ -133,10 +135,10 @@ def plot_histogram(data_path, column_names=['white', 'red']):
                 
                 # Plot bar chart for observed frequencies
                 ax.bar([x + i * bar_width for x in range(1, 7)], 
-                       observed_frequencies, 
-                       alpha=0.8, label=german_dict[column_name], width=bar_width,
-                       edgecolor='black',
-                       color='red' if column_name == 'red' else 'white')
+                        observed_frequencies, 
+                        alpha=0.8, label=german_dict[column_name], width=bar_width,
+                        edgecolor='black',
+                        color='red' if column_name == 'red' else 'white')
                 
                 # Annotate each bar with the actual count for each outcome
                 for x, freq in zip(range(1, 7), observed_frequencies):
@@ -145,9 +147,9 @@ def plot_histogram(data_path, column_names=['white', 'red']):
         # Plot theoretical probabilities (shared between both columns)
         theoretical_probs = [1/6] * 6
         ax.bar([x + len(column_names) * bar_width for x in range(1, 7)], 
-               theoretical_probs, 
-               alpha=0.5, label=f'Theoretisch', width=bar_width,
-               color='blue', hatch='//')
+                theoretical_probs, 
+                alpha=0.5, label='Theoretisch', width=bar_width,
+                color='blue', hatch='//')
 
         # Remove numerical x-tick labels and place images instead
         ax.set_xticks([1 + i * bar_width + len(column_names) * bar_width / 2 for i in range(6)])
@@ -175,8 +177,12 @@ def plot_histogram(data_path, column_names=['white', 'red']):
 
 
 ############## additional binom test
-def plot_histogram_bn(ax, df, column_names=['white', 'red']):
+def plot_histogram_bn(ax, df, column_names=None):
     '''basic histogram plot for the dice rolls for the larger plot with gridspec'''
+    
+    if column_names is None:
+        column_names = ['white', 'red']    
+    
     german_dict = {'white':'Weiss - Gewürfelt', 'red':'Rot - Gewürfelt'}
     
     # Set x-axis to integers only
@@ -192,10 +198,10 @@ def plot_histogram_bn(ax, df, column_names=['white', 'red']):
 
             # Plot bar chart for observed frequencies
             ax.bar([x + i * bar_width for x in range(1, 7)], 
-                   observed_frequencies, 
-                   alpha=0.8, label=german_dict[column_name], width=bar_width,
-                   edgecolor='black',
-                   color='red' if column_name == 'red' else 'white')
+                    observed_frequencies, 
+                    alpha=0.8, label=german_dict[column_name], width=bar_width,
+                    edgecolor='black',
+                    color='red' if column_name == 'red' else 'white')
 
             # Annotate each bar with the actual count for each outcome
             for x, freq in zip(range(1, 7), observed_frequencies):
@@ -204,9 +210,9 @@ def plot_histogram_bn(ax, df, column_names=['white', 'red']):
     # Plot theoretical probabilities (shared between both columns)
     theoretical_probs = [1/6] * 6
     ax.bar([x + len(column_names) * bar_width for x in range(1, 7)], 
-           theoretical_probs, 
-           alpha=0.1, label=f'Theoretisch', width=bar_width,
-           color='blue', hatch='//')
+            theoretical_probs, 
+            alpha=0.1, label='Theoretisch', width=bar_width,
+            color='blue', hatch='//')
 
     # Remove numerical x-tick labels and place images instead
     ax.set_xticks([1 + i * bar_width + len(column_names) * bar_width / 2 for i in range(6)])
@@ -244,7 +250,7 @@ def plot_binomial_test(sample_size, observed, color='white', p_alt=2.5/6, alpha=
     p_value_observed = 1 - binom.cdf(observed - 1, sample_size, p_true)
 
     # Plot the density function
-    ax.bar(x, density_null, color='blue', hatch='//', edgecolor='black', alpha=0.1, label=f'Theoretisch')
+    ax.bar(x, density_null, color='blue', hatch='//', edgecolor='black', alpha=0.1, label='Theoretisch')
 
     # Add vertical lines for critical value and observed value
     ax.axvline(x=int(critical_value), color='black', linestyle='--', label=f'95% Quantil: {int(critical_value)}')
@@ -259,9 +265,9 @@ def plot_binomial_test(sample_size, observed, color='white', p_alt=2.5/6, alpha=
     ax.legend()
 
     if color == 'red':
-        ax.set_title(f'Binomial Test Rot Nr. 3\n')
+        ax.set_title('Binomial Test Rot Nr. 3\n')
     if color == 'white':
-        ax.set_title(f'Binomial Test Weiss Nr. 6\n')
+        ax.set_title('Binomial Test Weiss Nr. 6\n')
     
     ax.set_xlabel('Anzahl Erfolge')
     ax.set_ylabel('Relative Häufigkeit')
@@ -293,26 +299,18 @@ def plot_binomial_test_only_text(sample_size, observed, color='white', p_alt=2.5
     # Define parameters
     p_true = 1/6   # Probability of success for the null hypothesis
 
-    # Calculate critical value for significance level
-    critical_value = binom.ppf(1 - alpha, sample_size, p_true)
-
     # Calculate power of the test
     power = 1 - binom.cdf(observed - 1, sample_size, p_alt)
 
     # Calculate p-value for the observed value under the real distribution
     p_value_observed = 1 - binom.cdf(observed - 1, sample_size, p_true)
 
-    if color == 'red':
-        test_type = 'Binomial Test Rot Nr. 3'
-    else:
-        test_type = 'Binomial Test Weiss Nr. 6'
-
     # Set title and axes labels
     if ax is not None:
         if color == 'red':
-            ax.set_title(f'Binomial Test für  Rot Nr. 3\n')
+            ax.set_title('Binomial Test für  Rot Nr. 3\n')
         else:
-            ax.set_title(f'Binomial Test für  Weiss Nr. 6\n')
+            ax.set_title('Binomial Test für  Weiss Nr. 6\n')
 
         # Add text box in front of the plot
         text = f'Power: {power:.2f}\n'
@@ -333,7 +331,7 @@ def plot_histogram_and_binomial_tests(data_path):
     '''plot histogram and binomial test for the dice rolls in combined plot'''
     
     with matplotlib_lock:
-        fig = plt.figure(figsize=(16, 6))  # Adjust the figure size here
+        plt.figure(figsize=(16, 6))  # Adjust the figure size here
         gs = gridspec.GridSpec(2, 2, width_ratios=[1.5, 1], height_ratios=[1, 1])  # Custom grid layout
         
         #count 6es and 3s
