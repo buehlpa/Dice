@@ -28,6 +28,7 @@ argpath='configuration/config.json'
 global args 
 args=load_and_parse_args(argpath)
 
+#################### IO utils for resultsfile:
 
 def append_to_csv(filepath, new_df):
     existing_df = pd.read_csv(filepath)
@@ -101,8 +102,7 @@ def reset_last_line(filepath):
         with open(filepath, 'w') as file:
             file.writelines(lines)
 
-##### Histograms
-
+####################################################### PLOTS 
 # helper function to place image on histogarmmplot
 
 def place_image(ax, img_path, xy, zoom=1):
@@ -111,7 +111,9 @@ def place_image(ax, img_path, xy, zoom=1):
     ab = AnnotationBbox(imagebox, xy, frameon=True, xybox=(20, -15), boxcoords="offset points", pad=0)
     ax.add_artist(ab)
 
+
 def plot_histogram(data_path, column_names=['white', 'red']):
+    '''basic histogram plot for the dice rolls'''
     
     german_dict= {'white':'Weiss - Gewürfelt', 'red':'Rot - Gewürfelt'}
     with matplotlib_lock:
@@ -173,10 +175,8 @@ def plot_histogram(data_path, column_names=['white', 'red']):
 
 
 ############## additional binom test
-
-
-
 def plot_histogram_bn(ax, df, column_names=['white', 'red']):
+    '''basic histogram plot for the dice rolls for the larger plot with gridspec'''
     german_dict = {'white':'Weiss - Gewürfelt', 'red':'Rot - Gewürfelt'}
     
     # Set x-axis to integers only
@@ -224,6 +224,7 @@ def plot_histogram_bn(ax, df, column_names=['white', 'red']):
     ax.legend()
     
 def plot_binomial_test(sample_size, observed, color='white', p_alt=2.5/6, alpha=0.05, ax=None):
+    '''mass plot of binomial dist with binom test for the larer plot with gridspec'''
     # Define parameters
     p_true = 1/6   # Probability of success for the null hypothesis
 
@@ -288,6 +289,7 @@ def plot_binomial_test(sample_size, observed, color='white', p_alt=2.5/6, alpha=
              fontsize=12, color=text_color, ha='center', va='center')
 
 def plot_binomial_test_only_text(sample_size, observed, color='white', p_alt=2.5/6, alpha=0.05, ax=None):
+    '''only text for binomial test for the larer plot with gridspec'''
     # Define parameters
     p_true = 1/6   # Probability of success for the null hypothesis
 
@@ -328,6 +330,7 @@ def plot_binomial_test_only_text(sample_size, observed, color='white', p_alt=2.5
 
 
 def plot_histogram_and_binomial_tests(data_path):
+    '''plot histogram and binomial test for the dice rolls in combined plot'''
     
     with matplotlib_lock:
         fig = plt.figure(figsize=(16, 6))  # Adjust the figure size here
