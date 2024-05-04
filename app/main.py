@@ -17,7 +17,7 @@ from utils.argparser import load_and_parse_args
 
 #flask
 import os
-from flask import Flask, Response, request, render_template_string, send_file
+from flask import Flask, Response, request, render_template_string, send_file, jsonify
 import webbrowser
 import signal
 
@@ -27,16 +27,16 @@ log = logging.getLogger('werkzeug')
 log.disabled = True
 
 #load arguments from configuration file
-
 argpath='configuration/config.json'
 
-global args, use_canny,capture_automatic,capture_manually
+# Set global arguments and flags
+global args, use_canny,capture_automatic,capture_manually,newImg
 
 args=load_and_parse_args(argpath)
 use_canny = True
 capture_automatic = True
 capture_manually=False
-
+newImg=True
 
 # camerastream + models 
 def gen_frames():
@@ -52,7 +52,7 @@ def gen_frames():
     dice_detector=DicePredictorThread()
     dice_detector.start_workers()
     
-    # IF you want to calibrate camera run separate calibration script 
+    # IF you want to calibrate camera run separate calibration script :state_calibration.py
     # initiate state detector  
     state_detector = StateDetector(args)
     
@@ -66,7 +66,7 @@ def gen_frames():
     dice_msg = 'Warte auf Vorhersage ... '
     state_msg = 'Initialisiere .. Status '    
     
-    # frame loop 
+    # frame loop, for every frame from the camera
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -97,11 +97,14 @@ def gen_frames():
                 dice_detector.enqueue_frame_for_dice(frame_resized)
                 capture_manually=False
                 
-        # if dice prediction is available, show it    
+        # if dice prediction is available this will return a dict wiht the predicitions, else None
         dice_prediction = dice_detector.get_dice_prediction()
-                
+        
+        # if the prediciton is available, write it to the results file       
         if dice_prediction:
             dice_msg= write_result(dice_prediction, filepath=os.path.join(args.RESPATH,'results.csv'))
+            global newImg
+            newImg=True
             
         if args.DEBUG_MODE:
             print(f'state:{state}',f'capture_state:{capture_state}',f'dice_prediction:{dice_prediction}')
@@ -112,11 +115,12 @@ def gen_frames():
                 fps = int(frame_count / elapsed_time)
                 frame_count = 0
                 start_time = time.time()
-                
+        
+        # overly image with canny filter        
         if use_canny:    
             frame =cv2.Canny(frame,150,200)   
     
-        # overlay state, dicecount and  FPS on the frame
+        # overlay state, dicecount and  detected state on the frame
         cv2.putText(frame, state_msg, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
         cv2.putText(frame, dice_msg, (10, 450), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
         
@@ -145,12 +149,24 @@ def reset_histogram():
 
 @app.route('/reset_last_line', methods=['POST'])
 def reset_last_line_route():
+    '''resets the last line of the results file'''
     csv_file = os.path.join(args.RESPATH, 'results.csv')
     reset_last_line(csv_file)
     return '', 204
 
+@app.route('/check_variable')
+def check_variable():
+    '''checks newImg variable if new data is available for the histogram plot'''
+    global newImg
+    if newImg:
+        newImg = False  # Reset the variable after checking
+        return jsonify({'status': True}), 200
+    else:
+        return jsonify({'status': False}), 200
+    
 @app.route('/plot.png')
 def plot_png():
+    '''calculate and sends the histogram image to the browser'''
     data_path = os.path.join(args.RESPATH, 'results.csv')     
     #img = plot_histogram(data_path)# original
     img=plot_histogram_and_binomial_tests(data_path)# new with binomial tests
