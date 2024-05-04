@@ -162,7 +162,7 @@ def plot_histogram(data_path, column_names=None):
         len_white = len(df['white'].dropna().tolist())
         len_red = len(df['red'].dropna().tolist())
         
-        plt.title(f' Anzahl Würfe - Rot: {len_white}, Weiss: {len_red}')
+        plt.title(f' Anzahl Würfe - Rot: {len_red}, Weiss: {len_white}')
         plt.ylabel('Relative Häufigkeit')
         plt.legend()
         #plt.show()
@@ -225,7 +225,7 @@ def plot_histogram_bn(ax, df, column_names=None):
     len_white = len(df['white'].dropna().tolist())
     len_red = len(df['red'].dropna().tolist())
 
-    ax.set_title(f' Anzahl Würfe - Rot: {len_white}, Weiss: {len_red}')
+    ax.set_title(f' Anzahl Würfe - Rot: {len_red}, Weiss: {len_white}')
     ax.set_ylabel('Relative Häufigkeit')
     ax.legend()
     
@@ -291,8 +291,8 @@ def plot_binomial_test(sample_size, observed, color='white', p_alt=2.5/6, alpha=
         text_color = 'green'
     
     ax.text(0.72, 0.3, text, transform=ax.transAxes,
-             bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=1'),
-             fontsize=12, color=text_color, ha='center', va='center')
+            bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=1'),
+            fontsize=12, color=text_color, ha='center', va='center')
 
 def plot_binomial_test_only_text(sample_size, observed, color='white', p_alt=2.5/6, alpha=0.05, ax=None):
     '''only text for binomial test for the larer plot with gridspec'''
@@ -327,7 +327,7 @@ def plot_binomial_test_only_text(sample_size, observed, color='white', p_alt=2.5
                 fontsize=12, color=text_color, ha='center', va='center')
 
 
-def plot_histogram_and_binomial_tests(data_path):
+def plot_histogram_and_binomial_tests(data_path, activate_test=False):
     '''plot histogram and binomial test for the dice rolls in combined plot'''
     
     with matplotlib_lock:
@@ -349,22 +349,23 @@ def plot_histogram_and_binomial_tests(data_path):
         
 
         # TODO : change the real probas
-        
-        if white_6 > 0:
-            plot_binomial_test(sample_size=len(white_list), observed=white_6, color='white', p_alt=2.5/6, alpha=0.05, ax=ax_white_test) # uncomment this and comment below for full plots
-            
-            # ax_white_test.axis('off')
-            # plot_binomial_test_only_text(sample_size=len(white_list), observed=white_6, color='white', p_alt=2.5/6, alpha=0.05, ax=ax_white_test)
+        if activate_test:
+            if white_6 > 0:
+                plot_binomial_test(sample_size=len(white_list), observed=white_6, color='white', p_alt=2.5/6, alpha=0.05, ax=ax_white_test) # uncomment this and comment below for full plots
+                # ax_white_test.axis('off')
+                # plot_binomial_test_only_text(sample_size=len(white_list), observed=white_6, color='white', p_alt=2.5/6, alpha=0.05, ax=ax_white_test)
+            else:
+                ax_white_test.axis('off')
+            if red_3 > 0:
+                plot_binomial_test(sample_size=len(red_list), observed=red_3, color='red', p_alt=2.5/6, alpha=0.05, ax=ax_red_test) # uncomment this and comment below for full plots
+                # ax_red_test.axis('off')
+                # plot_binomial_test_only_text(sample_size=len(red_list), observed=red_3, color='red', p_alt=2.5/6, alpha=0.05, ax=ax_red_test)
+            else:
+                ax_red_test.axis('off')
         else:
             ax_white_test.axis('off')
-        
-        if red_3 > 0:
-            plot_binomial_test(sample_size=len(red_list), observed=red_3, color='red', p_alt=2.5/6, alpha=0.05, ax=ax_red_test) # uncomment this and comment below for full plots
-            # ax_red_test.axis('off')
-            # plot_binomial_test_only_text(sample_size=len(red_list), observed=red_3, color='red', p_alt=2.5/6, alpha=0.05, ax=ax_red_test)
-        else:
             ax_red_test.axis('off')
-                    
+
         plt.tight_layout()
         #plt.show()
 
