@@ -288,7 +288,7 @@
             .then(response => {
                 if (response.ok) {
                     console.log("Histogram reset successfully.");
-                    refreshImage(); // Refresh the histogram image
+                    refreshImage(); 
                 }
             })
             .catch(error => console.error('Error:', error));
@@ -299,7 +299,7 @@
             .then(response => {
                 if (response.ok) {
                     console.log("last Line reset successfully.");
-                    refreshImage(); // Refresh the histogram image
+                    refreshImage(); 
                 }
             })
             .catch(error => console.error('Error:', error));
@@ -309,8 +309,8 @@
             fetch('/activate_test', { method: 'POST' })
             .then(response => {
                 if (response.ok) {
-                    console.log("Histogram reset successfully.");
-                    refreshImage(); // Refresh the histogram image
+                    console.log("Test activated.");
+                    refreshImage(); 
                 }
             })
             .catch(error => console.error('Error:', error));
