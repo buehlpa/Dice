@@ -7,14 +7,14 @@ A project to display Computer-Vision Machine-Learning and Statistics in a playfu
 
 
 ### Current Prototype
-<img src="https://github.com/buehlpa/Dice/assets/64488738/46b51cfd-4974-4864-b354-d0685827d79d" width="600">
+<img src="https://github.com/buehlpa/Dice/assets/64488738/46b51cfd-4974-4864-b354-d0685827d79d" width="400">
 
 
 ### Current UI
-<img src="https://github.com/buehlpa/Dice/assets/64488738/96d37a57-1f6c-4824-8ed6-64af55c19e70" width="600">
+<img src="https://github.com/buehlpa/Dice/assets/64488738/96d37a57-1f6c-4824-8ed6-64af55c19e70" width="400">
 
 ### Poster
-<img src="https://github.com/buehlpa/Dice/assets/64488738/65bcf43e-40bd-4e6f-898c-62354c127ece" width="600">
+<img src="https://github.com/buehlpa/Dice/assets/64488738/65bcf43e-40bd-4e6f-898c-62354c127ece" width="400">
 
 ### Working Principle
 
@@ -46,13 +46,13 @@ with the ConnectedComponents algorithm as well as the Bounding Rectangle, the is
 There is a small CNN with just 3 layers, an increasing amount of filters, Dropout, and ReLu activation functions with a classification Head at the end and CrossEntropy loss. The network is trained with an augmentation strategy on images like these:
 
 
-<img src="https://github.com/buehlpa/Dice/assets/64488738/c6e68c11-3828-4188-b71b-95074504c4f8" width="600">
+<img src="https://github.com/buehlpa/Dice/assets/64488738/c6e68c11-3828-4188-b71b-95074504c4f8" width="400">
 
 
 The dataset to train the model is combined from the object detection dataset https://github.com/nell-byler/dice_detection (just cut the dice according to the box coordinates) and own images taken from the dice detector Box.
 On a testset with 10 samples each (confusion matrix on the left Accuracy=100%), the outcome distribution (right )indicates that the classes were well-learned by the model.
 
-<img src="https://github.com/buehlpa/Dice/assets/64488738/8f528b2b-d547-4cff-8721-49673aa087c5" width="600">
+<img src="https://github.com/buehlpa/Dice/assets/64488738/8f528b2b-d547-4cff-8721-49673aa087c5" width="400">
 
 
 Of course, the whole part with traditional CV and the CNN could be replaced by just an object detection pipeline... 
@@ -66,7 +66,21 @@ For a more precise power analysis, we'd also need the real probability of the fa
 
 <img src="https://github.com/buehlpa/Dice/assets/64488738/ff6f8fbe-b07a-4b51-8ae5-6535a90aa594" width="600">
 
+## Repo overview
 
+working app in:
+```
+/app
+```
+
+testing different UI's , frameworks, QT etc.:
+```
+/dev_app
+```
+Jupyter notebooks for model , statistical tests and plotting:
+```
+/workspace
+```
 
 ## Installation on UNIX
 
