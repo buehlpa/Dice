@@ -64,7 +64,7 @@ Therefore we can formulate the Null hypothesis that if a die is not fake the tru
 To confidently say that this dice is biased towards our suspected numbers we can not solely rely on the p-value of said test. We have to consider the statistical power (The likelihood of not rejecting the Null hypothesis if the alternative is true, or the Probability of making an error of type 2 https://www.statisticshowto.com/probability-and-statistics/statistics-definitions/statistical-power/).
 For a more precise power analysis, we'd also need the real probability of the fake die, which we could empirically get by rolling the dice several hundred times. Not that the power of this test is reliant on the true probability of the alternative and also the sample size 
 
-<img src="https://github.com/buehlpa/Dice/assets/64488738/ff6f8fbe-b07a-4b51-8ae5-6535a90aa594" width="600">
+<img src="https://github.com/buehlpa/Dice/assets/64488738/ff6f8fbe-b07a-4b51-8ae5-6535a90aa594" width="400">
 
 ## Repo overview
 
