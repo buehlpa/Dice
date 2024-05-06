@@ -13,6 +13,7 @@ A project to display Computer-Vision Machine-Learning and Statistics in a playfu
 
 ### Current UI
 <img src="https://github.com/buehlpa/Dice/assets/64488738/96d37a57-1f6c-4824-8ed6-64af55c19e70" width="400">
+
 ### Working Principle
 
 Dices used in this project from: https://trick-dice.com/
