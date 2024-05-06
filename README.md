@@ -4,29 +4,15 @@
  **In development!**
 
 A project to display Computer-Vision Machine-Learning and Statistics in a playful way. 
-### Current Prototype and UI
-
-<div style="display: flex; justify-content: space-around; align-items: center;">
-    <div style="margin-right: 10px;">
-        <h3>Current Prototype</h3>
-        <img src="https://github.com/buehlpa/Dice/assets/64488738/46b51cfd-4974-4864-b354-d0685827d79d" width="400" alt="Current Prototype">
-    </div>
-    <div style="margin-left: 10px;">
-        <h3>Current UI</h3>
-        <img src="https://github.com/buehlpa/Dice/assets/64488738/96d37a57-1f6c-4824-8ed6-64af55c19e70" width="400" alt="Current UI">
-    </div>
-</div>
 
 ### Current Prototype
 <img src="https://github.com/buehlpa/Dice/assets/64488738/46b51cfd-4974-4864-b354-d0685827d79d" width="400">
 
-
-### Current UI
-<img src="https://github.com/buehlpa/Dice/assets/64488738/96d37a57-1f6c-4824-8ed6-64af55c19e70" width="400">
-
 ### Poster
 <img src="https://github.com/buehlpa/Dice/assets/64488738/65bcf43e-40bd-4e6f-898c-62354c127ece" width="400">
 
+### Current UI
+<img src="https://github.com/buehlpa/Dice/assets/64488738/96d37a57-1f6c-4824-8ed6-64af55c19e70" width="400">
 ### Working Principle
 
 Dices used in this project from: https://trick-dice.com/
