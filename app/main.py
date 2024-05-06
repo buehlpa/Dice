@@ -158,8 +158,9 @@ def reset_last_line_route():
 @app.route('/activate_test', methods=['POST'])
 def activate_test():
     '''switch the testing mode'''
-    global activate_test_var
-    activate_test_var = not activate_test_var
+    global activate_test_var, newImg
+    activate_test_var = True
+    newImg=True
     return '', 204
 
 
@@ -177,6 +178,7 @@ def check_variable():
 @app.route('/plot.png')
 def plot_png():
     '''calculate and sends the histogram image to the browser'''
+    global activate_test_var
     data_path = os.path.join(args.RESPATH, 'results.csv')     
     #img = plot_histogram(data_path)# original
     if not activate_test_var:
@@ -184,7 +186,7 @@ def plot_png():
         
     else:
         img=plot_histogram_and_binomial_tests(data_path,activate_test=True)# new with binomial tests
-        
+        activate_test_var=False
     return send_file(img, mimetype='image/png')
 
 @app.route('/video_feed')
