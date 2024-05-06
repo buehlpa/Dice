@@ -17,8 +17,6 @@ from matplotlib.ticker import MaxNLocator
 matplotlib.use('Agg') 
 from threading import Lock
 matplotlib_lock = Lock()
-
-
 #load arguments from configuration file
 # on windows : r'C:\Users\buehl\repos\Dice\rasperry_run\configuration\config_win.json'
 
@@ -301,7 +299,7 @@ def plot_binomial_test_only_text(sample_size, observed, color='white', p_alt=2.5
 
     # Calculate power of the test
     power = 1 - binom.cdf(observed - 1, sample_size, p_alt)
-
+    
     # Calculate p-value for the observed value under the real distribution
     p_value_observed = 1 - binom.cdf(observed - 1, sample_size, p_true)
 
@@ -351,13 +349,13 @@ def plot_histogram_and_binomial_tests(data_path, activate_test=False):
         # TODO : change the real probas
         if activate_test:
             if white_6 > 0:
-                plot_binomial_test(sample_size=len(white_list), observed=white_6, color='white', p_alt=2.5/6, alpha=0.05, ax=ax_white_test) # uncomment this and comment below for full plots
+                plot_binomial_test(sample_size=len(white_list), observed=white_6, color='white', p_alt=3/6, alpha=0.05, ax=ax_white_test) # uncomment this and comment below for full plots
                 # ax_white_test.axis('off')
                 # plot_binomial_test_only_text(sample_size=len(white_list), observed=white_6, color='white', p_alt=2.5/6, alpha=0.05, ax=ax_white_test)
             else:
                 ax_white_test.axis('off')
             if red_3 > 0:
-                plot_binomial_test(sample_size=len(red_list), observed=red_3, color='red', p_alt=2.5/6, alpha=0.05, ax=ax_red_test) # uncomment this and comment below for full plots
+                plot_binomial_test(sample_size=len(red_list), observed=red_3, color='red', p_alt=3/6, alpha=0.05, ax=ax_red_test) # uncomment this and comment below for full plots
                 # ax_red_test.axis('off')
                 # plot_binomial_test_only_text(sample_size=len(red_list), observed=red_3, color='red', p_alt=2.5/6, alpha=0.05, ax=ax_red_test)
             else:
