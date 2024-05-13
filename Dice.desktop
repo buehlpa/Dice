@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Start Dice App
+Comment=Starts the Dice App
+Exec=/home/raspelbeere1991/Projects/Dice/app/start_app.sh
+Icon=/home/raspelbeere1991/Projects/Dice/app/static/logo.ico
+Terminal=false
+Type=Application
+Categories=Utility;
+NoDisplay=true
+StartupNotify=true
+MimeType=application/x-executable;
